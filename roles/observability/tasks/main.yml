@@ -1,0 +1,131 @@
+---
+# Tasks for role: observability on Debian 12 (Bookworm)
+
+- name: Ensure Debian host prerequisites are installed
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - python3-yaml
+      - docker-compose-v2
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Verify Docker daemon is active and running
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Ensure external Docker bridge network exists
+  ansible.builtin.command:
+    cmd: "docker network inspect {{ observability_docker_network }}"
+  register: docker_network_check
+  changed_when: false
+  failed_when: false
+
+- name: Create external Docker bridge network if missing
+  ansible.builtin.command:
+    cmd: "docker network create --driver bridge {{ observability_docker_network }}"
+  when: docker_network_check.rc != 0
+  changed_when: true
+
+- name: Create base and persistent directory layout with strict 0750 permissions
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_dir_mode }}"
+  loop:
+    - "{{ observability_base_dir }}"
+    - "{{ observability_base_dir }}/vector"
+    - "{{ observability_base_dir }}/vector/config"
+    - "{{ observability_base_dir }}/gatus"
+    - "{{ observability_base_dir }}/gatus/config"
+    - "{{ observability_base_dir }}/gatus/data"
+
+- name: Deploy secrets environment file (.env)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ observability_base_dir }}/.env"
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_secret_file_mode }}"
+  notify: restart observability
+
+- name: Deploy Vector configuration (vector.yaml)
+  ansible.builtin.template:
+    src: vector.yaml.j2
+    dest: "{{ observability_base_dir }}/vector/config/vector.yaml"
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_file_mode }}"
+  notify:
+    - reload vector
+    - restart observability
+
+- name: Deploy Gatus configuration (config.yaml)
+  ansible.builtin.template:
+    src: gatus.yaml.j2
+    dest: "{{ observability_base_dir }}/gatus/config/config.yaml"
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_file_mode }}"
+  notify: restart observability
+
+- name: Deploy Docker Compose file (docker-compose.yaml)
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ observability_base_dir }}/docker-compose.yaml"
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_file_mode }}"
+  notify: restart observability
+
+- name: Check if Traefik dynamic config directory exists
+  ansible.builtin.stat:
+    path: "{{ traefik_dynamic_config_dir }}"
+  register: traefik_dir_stat
+  when: traefik_enable_file_provider | bool
+
+- name: Deploy Traefik dynamic ingress configuration file
+  ansible.builtin.template:
+    src: traefik-observability.yaml.j2
+    dest: "{{ traefik_dynamic_config_dir }}/observability.yaml"
+    owner: "{{ observability_user }}"
+    group: "{{ observability_group }}"
+    mode: "{{ observability_file_mode }}"
+  when:
+    - traefik_enable_file_provider | bool
+    - traefik_dir_stat.stat.exists is defined and traefik_dir_stat.stat.exists
+
+- name: Deploy systemd unit for observability stack
+  ansible.builtin.template:
+    src: observability.service.j2
+    dest: /etc/systemd/system/observability.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart observability
+
+- name: Ensure systemd daemon is reloaded and service is enabled
+  ansible.builtin.systemd:
+    name: observability.service
+    daemon_reload: true
+    enabled: true
+    state: started
+
+- name: Flush handlers to ensure changes take immediate effect
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify health and running status of containers
+  ansible.builtin.command:
+    cmd: "docker compose --file {{ observability_base_dir }}/docker-compose.yaml ps --format json"
+  register: compose_ps_output
+  changed_when: false
+  retries: 5
+  delay: 3
+  until: compose_ps_output.rc == 0

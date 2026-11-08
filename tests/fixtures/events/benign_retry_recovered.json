@@ -1,0 +1,26 @@
+{
+  "fixture_id": "benign_retry_recovered",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "info",
+  "is_error": false,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": false,
+    "severity": "info",
+    "status_code": 200,
+    "stream": "stdout",
+    "raw_message": "upstream retry succeeded on attempt 3",
+    "timestamp": "2026-09-01T23:57:00Z"
+  },
+  "host_meta": {
+    "container": "auth_edge",
+    "hostname": "debian-node-03"
+  }
+}

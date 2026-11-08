@@ -1,0 +1,26 @@
+{
+  "fixture_id": "db_connection_exhaustion_03",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "too many connections for role ledger_app",
+    "timestamp": "2026-09-01T23:03:00Z"
+  },
+  "host_meta": {
+    "container": "auth_edge",
+    "hostname": "debian-node-03"
+  }
+}

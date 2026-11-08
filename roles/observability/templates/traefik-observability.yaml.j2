@@ -1,0 +1,46 @@
+# ==============================================================================
+# Traefik File Provider Dynamic Ingress for Observability Triad
+# Destination: /etc/traefik/dynamic/observability.yaml
+# ==============================================================================
+
+http:
+  routers:
+    dozzle-logs:
+      rule: "Host(`{{ observability_logs_subdomain }}.{{ observability_domain }}`)"
+      entryPoints:
+        - "{{ traefik_entrypoint }}"
+      service: dozzle-service
+      middlewares:
+        - keycloak-forward-auth
+      tls:
+        certResolver: "{{ traefik_certresolver }}"
+
+    gatus-status:
+      rule: "Host(`{{ observability_status_subdomain }}.{{ observability_domain }}`)"
+      entryPoints:
+        - "{{ traefik_entrypoint }}"
+      service: gatus-service
+      tls:
+        certResolver: "{{ traefik_certresolver }}"
+
+  services:
+    dozzle-service:
+      loadBalancer:
+        servers:
+          - url: "http://dozzle:{{ dozzle_port }}"
+
+    gatus-service:
+      loadBalancer:
+        servers:
+          - url: "http://gatus:{{ gatus_port }}"
+
+  middlewares:
+    keycloak-forward-auth:
+      forwardAuth:
+        address: "https://{{ observability_auth_subdomain }}.{{ observability_domain }}/oauth2/auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-Auth-Request-User"
+          - "X-Auth-Request-Email"
+          - "X-Auth-Request-Groups"
+          - "X-Auth-Request-Preferred-Username"

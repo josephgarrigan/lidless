@@ -1,0 +1,26 @@
+{
+  "fixture_id": "benign_config_reload",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "info",
+  "is_error": false,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": false,
+    "severity": "info",
+    "status_code": 200,
+    "stream": "stdout",
+    "raw_message": "configuration reloaded from /etc/ledger/config.yaml",
+    "timestamp": "2026-09-01T23:58:00Z"
+  },
+  "host_meta": {
+    "container": "orders_api",
+    "hostname": "debian-node-01"
+  }
+}

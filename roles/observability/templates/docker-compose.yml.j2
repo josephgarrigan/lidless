@@ -1,0 +1,111 @@
+# ==============================================================================
+# Ephemeral Zero-Retention Observability Triad
+# Memory Budget:
+# - vector: 35M limit (15M reservation)
+# - dozzle: 25M limit (10M reservation)
+# - gatus:  35M limit (15M reservation)
+# Total RAM Allocation: < 95M (Strictly below 100M threshold)
+# ==============================================================================
+
+services:
+  vector:
+    image: {{ vector_image }}
+    container_name: vector
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    env_file:
+      - {{ observability_base_dir }}/.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - {{ observability_base_dir }}/vector/config/vector.yaml:/etc/vector/vector.yaml:ro
+    networks:
+      - {{ observability_docker_network }}
+    deploy:
+      resources:
+        limits:
+          memory: {{ vector_mem_limit }}
+        reservations:
+          memory: {{ vector_mem_reservation }}
+    healthcheck:
+      test: ["CMD", "vector", "validate", "--no-environment", "/etc/vector/vector.yaml"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  dozzle:
+    image: {{ dozzle_image }}
+    container_name: dozzle
+    restart: unless-stopped
+    read_only: true
+    environment:
+      - DOZZLE_NO_ANALYTICS=true
+      - DOZZLE_ENABLE_ACTIONS=false
+      - DOZZLE_ADDR=:{{ dozzle_port }}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - {{ observability_docker_network }}
+    expose:
+      - "{{ dozzle_port }}"
+    deploy:
+      resources:
+        limits:
+          memory: {{ dozzle_mem_limit }}
+        reservations:
+          memory: {{ dozzle_mem_reservation }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network={{ observability_docker_network }}"
+      - "traefik.http.routers.dozzle.rule=Host(`{{ observability_logs_subdomain }}.{{ observability_domain }}`)"
+      - "traefik.http.routers.dozzle.entrypoints={{ traefik_entrypoint }}"
+      - "traefik.http.routers.dozzle.tls=true"
+      - "traefik.http.routers.dozzle.tls.certresolver={{ traefik_certresolver }}"
+      - "traefik.http.routers.dozzle.middlewares={{ traefik_forward_auth_middleware }}"
+      - "traefik.http.services.dozzle.loadbalancer.server.port={{ dozzle_port }}"
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  gatus:
+    image: {{ gatus_image }}
+    container_name: gatus
+    restart: unless-stopped
+    env_file:
+      - {{ observability_base_dir }}/.env
+    volumes:
+      - {{ observability_base_dir }}/gatus/config/config.yaml:/config/config.yaml:ro
+      - {{ observability_base_dir }}/gatus/data:/data
+    networks:
+      - {{ observability_docker_network }}
+    expose:
+      - "{{ gatus_port }}"
+    deploy:
+      resources:
+        limits:
+          memory: {{ gatus_mem_limit }}
+        reservations:
+          memory: {{ gatus_mem_reservation }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network={{ observability_docker_network }}"
+      - "traefik.http.routers.gatus.rule=Host(`{{ observability_status_subdomain }}.{{ observability_domain }}`)"
+      - "traefik.http.routers.gatus.entrypoints={{ traefik_entrypoint }}"
+      - "traefik.http.routers.gatus.tls=true"
+      - "traefik.http.routers.gatus.tls.certresolver={{ traefik_certresolver }}"
+      - "traefik.http.services.gatus.loadbalancer.server.port={{ gatus_port }}"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  {{ observability_docker_network }}:
+    external: true

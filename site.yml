@@ -1,0 +1,18 @@
+---
+# Master deployment playbook for Observability Triad on Debian 12
+- name: Deploy Ephemeral Zero-Retention Observability Triad
+  hosts: observability_hosts
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Validate target operating system is Debian 12 (Bookworm)
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family == "Debian"
+          - ansible_distribution_major_version | int >= 12
+        fail_msg: "This role specifically targets Debian 12 (Bookworm) or newer."
+        success_msg: "Host is Debian {{ ansible_distribution_version }} (Bookworm compatible)."
+
+  roles:
+    - role: observability

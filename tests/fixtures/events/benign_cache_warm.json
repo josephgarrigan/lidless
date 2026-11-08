@@ -1,0 +1,26 @@
+{
+  "fixture_id": "benign_cache_warm",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "info",
+  "is_error": false,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": false,
+    "severity": "info",
+    "status_code": 200,
+    "stream": "stdout",
+    "raw_message": "cache warm complete: 18432 keys",
+    "timestamp": "2026-09-01T23:54:00Z"
+  },
+  "host_meta": {
+    "container": "batch_exporter",
+    "hostname": "debian-node-03"
+  }
+}

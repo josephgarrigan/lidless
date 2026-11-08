@@ -1,0 +1,26 @@
+{
+  "fixture_id": "upstream_timeout_05",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "request to https://partner.example/api timed out",
+    "timestamp": "2026-09-01T23:29:00Z"
+  },
+  "host_meta": {
+    "container": "search_index",
+    "hostname": "debian-node-02"
+  }
+}

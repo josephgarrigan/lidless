@@ -1,0 +1,53 @@
+tenant_id: "fintech"
+organization: "acme-payments"
+description: "Fintech payment processing pipeline and PCI ledger"
+tier: "enterprise"
+silenced: false
+anecdote_verbosity: "user_friendly"
+
+routing:
+  default_sink: "slack"
+  slack_webhook_url: "https://hooks.slack.com/services/T00/B00/fintech-ops"
+  matrix_room_id: "!fintech_incidents:domain.tld"
+  pagerduty_routing_key: "pd_key_fintech_live_99482"
+  s3_archive_prefix: "s3://tenant-fintech-audit/logs/"
+
+severity_overrides:
+  critical:
+    - "pagerduty"
+    - "matrix"
+    - "slack"
+  error:
+    - "slack"
+
+auto_remediation:
+  enabled: true
+  target_action: "restart_container"
+  max_restarts_per_hour: 3
+
+# Decision gate (L-006). OFF: a tenant opts in deliberately, after the shadow
+# period its policy names. mode is inert while enabled is false.
+decision_gate:
+  enabled: false
+  mode: "shadow"
+  # lidless#8: benign log lines arrive at the router looking exactly like incidents, and this
+  # tenant's rooms were being told about them. The stopgap refuses anything the collector did not
+  # mark as an error, until the gate itself is answering the severity question.
+  is_error_stopgap: true
+  # Pinned deliberately: an alias can move under calibrated thresholds.
+  model: "jev-1.13.0"
+  # ADR-0001: structured metadata plus sanitize_message() output.
+  state_mode: "sanitized_content"
+  questions_version: "v1"
+  allowed_severities:
+    - "critical"
+  on_low_confidence: "escalate"
+  # PLACEHOLDERS. PLAN.md 2.3 carried these as an illustration and the L-002
+  # measurement voided them: Jev answers help~0.4 / discards~0.75 on exactly the
+  # events these were meant to approve. L-008 derives the real values from shadow
+  # data; until then the gate can only withhold, which is the safe direction.
+  thresholds:
+    restart_container:
+      min_severity_confidence: 0.90
+      min_restart_would_help: 0.85
+      max_restart_discards_state: 0.15

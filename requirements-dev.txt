@@ -1,0 +1,12 @@
+# Test and validation dependencies for the offline suites.
+#
+# The runtime modules (windmill/flows/*) are stdlib-only by design. These are
+# for tests/ and for the template contract check, and they are what CI installs.
+#
+# Until 2026-10-28 tests/README claimed the suites ran under "plain python3".
+# They did not: four of the seven need `requests`, and the policy-schema and
+# template checks need `jsonschema`/`pyyaml`/`jinja2`.
+jsonschema
+pyyaml
+requests
+jinja2

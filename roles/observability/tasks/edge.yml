@@ -1,0 +1,185 @@
+---
+# Tasks for the deployed half: the edge collector (Vector only).
+#
+# Run through edge.yml, not site.yml. site.yml deploys the triad, which has
+# never been deployed anywhere.
+#
+# What this play does NOT do: install Docker, touch the Nebula overlay, or
+# create the VictoriaLogs centre. It assumes a node that is already on the
+# overlay with a running Docker daemon, and it only ever reads the Docker
+# socket.
+
+# Ansible loads defaults/main.yml automatically but not other files in
+# defaults/, and the edge settings live in defaults/edge-collector.yml to keep
+# them separate from the triad's. Load them explicitly, at lower precedence than
+# the role defaults so group_vars and -e still win.
+- name: Load the edge collector defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/defaults/edge-collector.yml"
+    name: edge_defaults
+
+- name: Apply the edge collector defaults where nothing else set them
+  ansible.builtin.set_fact:
+    victorialogs_addr: "{{ victorialogs_addr | default(edge_defaults.victorialogs_addr) }}"
+    vector_edge_host_name: "{{ vector_edge_host_name | default(inventory_hostname) }}"
+    vector_edge_intranet: "{{ vector_edge_intranet | default(edge_defaults.vector_edge_intranet) }}"
+    vector_edge_host_class: "{{ vector_edge_host_class | default(edge_defaults.vector_edge_host_class) }}"
+    vector_edge_journald: "{{ vector_edge_journald | default(edge_defaults.vector_edge_journald) }}"
+    vector_edge_journald_units: "{{ vector_edge_journald_units | default(edge_defaults.vector_edge_journald_units) }}"
+    vector_edge_self_test: "{{ vector_edge_self_test | default(edge_defaults.vector_edge_self_test) }}"
+    vector_edge_lg_access: "{{ vector_edge_lg_access | default(edge_defaults.vector_edge_lg_access) }}"
+    vector_edge_lg_container: "{{ vector_edge_lg_container | default(edge_defaults.vector_edge_lg_container) }}"
+    vector_edge_portal_access: "{{ vector_edge_portal_access | default(edge_defaults.vector_edge_portal_access) }}"
+    vector_edge_portal_container: "{{ vector_edge_portal_container | default(edge_defaults.vector_edge_portal_container) }}"
+    vector_edge_http_access: "{{ vector_edge_http_access | default(edge_defaults.vector_edge_http_access) }}"
+    vector_edge_http_container: "{{ vector_edge_http_container | default(edge_defaults.vector_edge_http_container) }}"
+    vector_edge_http_keep_status_below: "{{ vector_edge_http_keep_status_below | default(edge_defaults.vector_edge_http_keep_status_below) }}"
+    vector_edge_http_prune_static: "{{ vector_edge_http_prune_static | default(edge_defaults.vector_edge_http_prune_static) }}"
+    vector_edge_http_static_regex: "{{ vector_edge_http_static_regex | default(edge_defaults.vector_edge_http_static_regex) }}"
+    # Caddy's front-door lens. A flag the template reads but this block does not
+    # bind is undefined at render time — the deploy fails after it has already
+    # touched the host. Keep every `{% if vector_... %}` in the template bound here.
+    vector_edge_caddy_access: "{{ vector_edge_caddy_access | default(edge_defaults.vector_edge_caddy_access) }}"
+    vector_edge_synapse_access: "{{ vector_edge_synapse_access | default(edge_defaults.vector_edge_synapse_access) }}"
+    # The judgement table. Omitting this broke every deploy that did not pass it
+    # on the command line: 'vector_edge_judgement_csv' is undefined.
+    vector_edge_judgement_csv: "{{ vector_edge_judgement_csv | default(edge_defaults.vector_edge_judgement_csv) }}"
+    vector_sanitize_private_ipv4_only: "{{ vector_sanitize_private_ipv4_only | default(edge_defaults.vector_sanitize_private_ipv4_only) }}"
+    vector_collector_image: >-
+      {{ vector_collector_image | default(
+           (vector_edge_journald | bool)
+           | ternary(edge_defaults.vector_collector_image_journald,
+                     edge_defaults.vector_collector_image_default), true) }}
+    vector_collector_mem_limit: "{{ vector_collector_mem_limit | default(edge_defaults.vector_collector_mem_limit) }}"
+    vector_collector_base_dir: "{{ vector_collector_base_dir | default(edge_defaults.vector_collector_base_dir) }}"
+    vector_docker_socket: "{{ vector_docker_socket | default(edge_defaults.vector_docker_socket) }}"
+
+- name: Require a Docker daemon on the node
+  ansible.builtin.command:
+    cmd: docker version
+  register: docker_version
+  changed_when: false
+  failed_when: docker_version.rc != 0
+
+- name: Ensure the collector directory exists
+  ansible.builtin.file:
+    path: "{{ vector_collector_base_dir }}/config"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Place the judgement table
+  ansible.builtin.copy:
+    src: "{{ vector_edge_judgement_csv }}"
+    dest: "{{ vector_collector_base_dir }}/config/judgements.csv"
+    owner: root
+    group: root
+    mode: "0644"
+  when: vector_edge_judgement_csv | length > 0
+  notify: restart edge collector
+
+- name: Write an empty judgement table when none was supplied
+  ansible.builtin.copy:
+    content: "template,class,reason,confidence,rules_version\n"
+    dest: "{{ vector_collector_base_dir }}/config/judgements.csv"
+    owner: root
+    group: root
+    mode: "0644"
+  when: vector_edge_judgement_csv | length == 0
+  notify: restart edge collector
+
+- name: Deploy the edge collector configuration
+  ansible.builtin.template:
+    src: vector-edge.yaml.j2
+    dest: "{{ vector_collector_base_dir }}/config/vector.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart edge collector
+
+- name: Deploy the collector compose file
+  ansible.builtin.template:
+    src: vector-edge-compose.yaml.j2
+    dest: "{{ vector_collector_base_dir }}/docker-compose.yaml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart edge collector
+
+- name: Bring the collector up
+  ansible.builtin.command:
+    cmd: docker compose -f {{ vector_collector_base_dir }}/docker-compose.yaml up -d
+    chdir: "{{ vector_collector_base_dir }}"
+  register: edge_compose_up
+  changed_when: "'Started' in edge_compose_up.stderr or 'Recreated' in edge_compose_up.stderr"
+
+- name: Flush handlers before verifying the running state
+  ansible.builtin.meta: flush_handlers
+
+- name: Read the running container id
+  ansible.builtin.command:
+    cmd: >-
+      docker compose -f {{ vector_collector_base_dir }}/docker-compose.yaml
+      ps --status running --quiet vector
+  register: edge_ps
+  changed_when: false
+  retries: 5
+  delay: 3
+  until: edge_ps.stdout | trim | length > 0
+
+- name: Assert the collector is running
+  ansible.builtin.assert:
+    that:
+      - edge_ps.stdout | trim | length > 0
+    fail_msg: "The vector container is not running on {{ inventory_hostname }}."
+
+# The marker must declare a level. It used to rely on writing to stderr being
+# shipped as an error; once the qualifier stopped treating stderr as a verdict,
+# an unlabelled marker was correctly dropped and the self-test failed against a
+# working collector.
+- name: Emit the self-test marker
+  ansible.builtin.command:
+    cmd: >-
+      docker run --rm --name lidless-selftest --entrypoint sh
+      {{ vector_collector_image }}
+      -c 'echo "level=error msg=lidless selftest {{ vector_edge_host_name }} $(date -u +%FT%TZ)" >&2; sleep 10'
+  changed_when: false
+  when: vector_edge_self_test | bool
+
+- name: Wait for the marker to arrive at the centre
+  ansible.builtin.uri:
+    url: "http://{{ victorialogs_addr }}:9428/select/logsql/query"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      # Filter by host only: the marker text is unambiguously ours, and phrase
+      # matching on _msg is a LogSQL detail we do not need to depend on here.
+      query: 'host:"{{ vector_edge_host_name }}"'
+      start: "10m"
+      limit: "50"
+    return_content: true
+    status_code: 200
+  register: edge_self_test
+  changed_when: false
+  until: edge_self_test.content is search("lidless selftest")
+  retries: 10
+  delay: 3
+  when: vector_edge_self_test | bool
+
+- name: Read the identity line from the rendered config
+  ansible.builtin.command:
+    cmd: >-
+      grep -F '.host = "{{ vector_edge_host_name }}"'
+      {{ vector_collector_base_dir }}/config/vector.yaml
+  register: edge_identity
+  changed_when: false
+  failed_when: false
+
+- name: Assert the identity field is the node name, not a container hash
+  ansible.builtin.assert:
+    that:
+      - edge_identity.rc == 0
+    fail_msg: >-
+      Rendered config does not contain the inventory host name as .host. A
+      collector without a literal host name attributes events to container ids.

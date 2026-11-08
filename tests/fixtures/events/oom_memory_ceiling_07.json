@@ -1,0 +1,26 @@
+{
+  "fixture_id": "oom_memory_ceiling_07",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "critical",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "critical",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "runtime: out of memory: cannot allocate 1048576-byte block (8388608 in use)",
+    "timestamp": "2026-09-01T23:15:00Z"
+  },
+  "host_meta": {
+    "container": "payment_gateway",
+    "hostname": "debian-node-01"
+  }
+}

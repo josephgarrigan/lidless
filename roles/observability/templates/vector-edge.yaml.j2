@@ -1,0 +1,818 @@
+api:
+  enabled: true
+  # Loopback only. The API is a local debugging surface; it is never published.
+  address: 127.0.0.1:8686
+
+# A tmpfs mountpoint (see the compose file). The journald source requires this
+# directory to already exist, and /tmp/vector did not — Vector refuses to start
+# with "data_dir does not exist" rather than creating it.
+data_dir: /var/lib/vector
+
+{% if vector_edge_http_access | bool %}
+# Judgements baked offline (scripts/bake_judgements.py) and shipped as a file.
+# The edge does not decide what a request means; it looks up a decision that was
+# made from real traffic on the GPU tier, and records which bake it is running.
+# A missing key is "unknown", which ships rather than silences.
+#
+# Only the Traefik lens calls get_enrichment_table_record(). Emitting this table
+# on a collector that has no access lens makes Vector refuse to start when the
+# CSV is absent — which is exactly what happened to the four base collectors on
+# 2026-10-31: the config required a file the base deploy does not ship.
+enrichment_tables:
+  judgements:
+    type: file
+    file:
+      path: /etc/vector/judgements.csv
+      encoding:
+        type: csv
+        headers:
+          template: string
+          class: string
+          reason: string
+          confidence: string
+          rules_version: string
+{% endif %}
+
+sources:
+  # A collector that has nothing to say is healthy, and a collector that is
+  # dead says the same thing. Once the qualifier stopped shipping routine
+  # output, "no events from this host" became the normal state — so freshness
+  # needs a signal that does not depend on the qualifier. One event every five
+  # minutes, twelve an hour, 288 a day: the cheapest possible proof of life.
+  # (Vector 0.58 has no `heartbeat` source; demo_logs with a fixed line and no
+  # count is the periodic generator without pretending to be one.)
+  heartbeat:
+    type: demo_logs
+    format: json
+    interval: 300
+
+  docker_logs:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    exclude_containers:
+      - vector
+      - victoria-logs
+{% if vector_edge_http_access | bool %}
+      # The proxy is read at INFO by its own source below, not at ERROR here.
+      - {{ vector_edge_http_container }}
+{% endif %}
+{% if vector_edge_journald | bool %}
+
+  # System logs. On a cloud VPS the events that matter (sshd, the proxy,
+  # cloud-init, the unit that failed to start) are here, not in a container.
+  journald:
+    type: journald
+    # The journal holds the whole boot (Aug 28 on the DMZ): tens of thousands of
+    # historical unit errors, which VictoriaLogs then rejects as older than its
+    # retention. Ship from now on — a collector, not a replayer.
+    since_now: true
+{# An empty allow-list must omit the key entirely: `include_units:` with
+   nothing under it is YAML null, and Vector then refuses to start with
+   "invalid type: null, expected a sequence". Empty means every unit. #}
+{% if vector_edge_journald_units %}
+    include_units:
+{% for unit in vector_edge_journald_units %}
+      - {{ unit }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if vector_edge_http_access | bool %}
+
+  # The public edge's access log. Traefik emits one JSON line per request at INFO;
+  # the default qualifier would drop every one of them. Read separately so this
+  # source can be lifted to INFO without lifting the rest of the node with it.
+  docker_logs_http:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    include_containers:
+      - {{ vector_edge_http_container }}
+{% endif %}
+
+{% if vector_edge_lg_access | bool %}
+
+  # The reaction controller speaks Go's standard logger: a timestamp and a
+  # message, with no level token. The error floor would ship none of it, and the
+  # decisions it records are the point of having it.
+  docker_logs_lg:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    include_containers:
+      - {{ vector_edge_lg_container }}
+{% endif %}
+{% if vector_edge_portal_access | bool %}
+
+  # The portal's own access log. Uvicorn writes one INFO line per request, which
+  # the error floor drops; reading it as its own source lifts only this container
+  # to a request lens, not the whole node.
+  docker_logs_portal:
+    type: docker_logs
+    docker_host: unix:///var/run/docker.sock
+    include_containers:
+      - {{ vector_edge_portal_container }}
+{% endif %}
+
+transforms:
+  # ---- qualify at the edge: classify severity, drop the rest in memory ----
+  classify:
+    type: remap
+    inputs:
+      - docker_logs
+{% if vector_edge_journald | bool %}
+      - journald
+{% endif %}
+    source: |
+      # Identity comes from Dura/Arachnoid, never from the container. The
+      # canonical name is the Arachnoid record's `name` (e.g. control-plane),
+      # not a Docker hostname and not a container id.
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      # journald events carry no container_name; name the unit instead.
+      # (No `??` here: path access is infallible in VRL, so coalescing is a
+      # compile error — E651 — and this file would not load.)
+      .container = .container_name
+      if .container == null || .container == "" { .container = ._SYSTEMD_UNIT }
+      if .container == null || .container == "" { .container = .SYSLOG_IDENTIFIER }
+      if .container == null || .container == "" { .container = "system" }
+      .log_stream = .stream
+      .raw = to_string(.message) ?? ""
+
+      # Rust tracing (Windmill), Go CLIs and plenty of other tools wrap the level
+      # in ANSI colour: "\x1b[31mERROR\x1b[0m". The level regex below needs a
+      # boundary on both sides, and ESC is neither whitespace nor punctuation, so
+      # an ANSI-coloured ERROR produced NO level — and the vocabulary fallback does
+      # not contain the word ERROR. The result was silence: windmill_server logged
+      # 11 ERROR lines in 24h and the centre received none of them. Strip the
+      # escapes before anything reads the line; `_msg` also stops carrying mojibake.
+      .raw = replace(.raw, r'\x1b\[[0-9;]*[A-Za-z]', "")
+
+{% if vector_edge_lg_access | bool %}
+
+  # ---- the reaction controller's decision lens ------------------------------
+  # 2026/11/03 18:40:05 event map: tenant.erpnext.user.created -> MembershipChanged
+  # Every line is a decision or a refusal, so all of them ship; the class is read
+  # from the message's own vocabulary (the logger has no level field).
+  lg_access:
+    type: remap
+    inputs:
+      - docker_logs_lg
+    source: |
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = .container_name
+      .log_stream = .stream
+      .ts = .timestamp
+      .raw = to_string(.message) ?? ""
+      .lens = "looking-glass"
+
+      hit, herr = parse_regex(.raw, r'^(?P<day>[0-9]{4}/[0-9]{2}/[0-9]{2}) (?P<clock>[0-9]{2}:[0-9]{2}:[0-9]{2}) (?P<msg>.*)$')
+      if herr != null { .lg_msg = .raw } else { .lg_msg = to_string!(hit.msg) }
+
+      if match(.lg_msg, r'(?i)\b(error|failed|refused|unreachable|panic|fatal)\b') {
+        .lens_class = "error"
+        .severity = "error"
+      } else if match(.lg_msg, r'(?i)(unknown event type|rejecting|refus|denied)') {
+        .lens_class = "refusal"
+        .severity = "warning"
+      } else if match(.lg_msg, r'(?i)(event map:|Reconciling)') {
+        .lens_class = "decision"
+        .severity = "info"
+      } else {
+        .lens_class = "activity"
+        .severity = "info"
+      }
+      .raw = "lg " + .lens_class + ": " + .lg_msg
+{% endif %}
+{% if vector_edge_portal_access | bool %}
+
+  # ---- the application portal's access lens --------------------------------
+  # Uvicorn:  INFO:     198.51.100.212:50414 - "GET /health HTTP/1.1" 200 OK
+  # Same shared vocabulary as the proxy lens (`lens_class`), so a query written
+  # against one host works here: a portal request is evidence, not noise.
+  portal_access:
+    type: remap
+    inputs:
+      - docker_logs_portal
+    source: |
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = .container_name
+      .log_stream = .stream
+      .ts = .timestamp
+      .raw = to_string(.message) ?? ""
+      .lens = "portal"
+
+      hit, herr = parse_regex(.raw, r'INFO:\s+(?P<addr>[0-9a-fA-F:.]+):(?P<port>[0-9]+) - "(?P<method>[A-Z]+) (?P<path>[^ ]+) HTTP/[0-9.]+" (?P<status>[0-9]{3})')
+      if herr != null { abort }
+
+      # parse_regex returns strings for these groups, so the coalesce is both
+      # unnecessary and a compile error ("this expression can't fail").
+      .client_addr = to_string!(hit.addr)
+      .http_method = to_string!(hit.method)
+      .http_path = to_string!(hit.path)
+      .http_status = to_int!(hit.status)
+      .http_host = "-"
+      .http_router = "activitypub-portal"
+      .http_service = "activitypub-portal"
+
+      if .http_status >= 500 { .lens_class = "error"; .severity = "error" }
+      else if .http_status == 401 || .http_status == 403 { .lens_class = "auth"; .severity = "warning" }
+      else if .http_status == 429 { .lens_class = "throttle"; .severity = "warning" }
+      else if .http_status >= 400 { .lens_class = "client_error"; .severity = "warning" }
+      else { .lens_class = "access"; .severity = "info" }
+
+      .raw = .http_method + " " + .http_path + " -> " + to_string(.http_status) + " lens=portal"
+{% endif %}
+
+{% if vector_edge_caddy_access | bool %}
+      # Caddy access records get the structured treatment in `caddy_access`.
+      # Abort here or a 5xx would ship twice — once raw, once parsed.
+      if contains(.raw, "http.log.access") { abort }
+{% endif %}
+{% if vector_edge_synapse_access | bool %}
+      # Synapse access records are handled by `synapse_access`; a 5xx here
+      # would otherwise ship twice.
+      if contains(.raw, "synapse.access.http") { abort }
+{% endif %}
+      .ts = .timestamp
+
+      .status_code = 0
+      parsed, perr = parse_json(.raw)
+      if perr == null && is_object(parsed) {
+        if is_integer(parsed.status) { .status_code = to_int!(parsed.status) }
+        else if is_integer(parsed.status_code) { .status_code = to_int!(parsed.status_code) }
+      }
+
+      # ---- what level does the line declare? -------------------------------
+      # The stream heuristic is a last resort, not a verdict. Synapse logs INFO
+      # to stderr and Fleet logs JSON with "level":"info", so treating stderr as
+      # error shipped whole access logs as failures. Read the declared level
+      # first: the JSON field, the journald priority, or the common text forms.
+      .level = ""
+      if perr == null && is_object(parsed) {
+        .level = downcase(to_string(parsed.level) ?? "")
+      }
+      if .level == "" {
+        lm, lerr = parse_regex(.raw, r'(?i)(?:^|[\s\[\(\-=:,])(?P<lvl>trace|debug|info|notice|warn|warning|error|err|crit|critical|fatal|panic)(?:$|[\s\]\)\-=:,])')
+        if lerr == null && lm != null {
+          lv = to_string(lm.lvl)
+          if lv != "" && lv != "null" { .level = downcase(lv) }
+        }
+      }
+
+      # ---- severity: declared level first, heuristics after -----------------
+      .severity = "info"
+      if .level != "" {
+        if .level == "warn" || .level == "warning" { .severity = "warning" }
+        if .level == "error" || .level == "err" { .severity = "error" }
+        if .level == "crit" || .level == "critical" || .level == "fatal" || .level == "panic" { .severity = "critical" }
+        # trace/debug/info/notice stay info and are dropped downstream.
+      } else {
+        # journald carries the syslog priority, which is a declared level too.
+        # `to_int(null)` is 0 — emergency — so an absent field must not reach the
+        # comparison at all; it would mark every plain stderr line critical.
+        prio = -1
+        if .PRIORITY != null { prio = to_int(.PRIORITY) ?? -1 }
+        if prio >= 0 {
+          if prio <= 2 { .severity = "critical" }
+          if prio == 3 { .severity = "error" }
+          if prio == 4 { .severity = "warning" }
+        } else if match(.raw, r'(?i)(exception|traceback|denied|unauthorized|forbidden|connection refused|cannot connect|no such host|timeout|no space left|cannot allocate|out of memory|failed to|unable to|address already in use)') {
+          # Nothing declared a level: judge the words themselves. Note what is
+          # NOT here — "it went to stderr" is not an error. Postgres logs routine
+          # checkpoints to stderr, and the previous version shipped every one.
+          .severity = "error"
+        }
+      }
+
+      # A crash word outranks a declared level: a process that says "info" and
+      # then segfaults was not informational. The boundaries matter — the old
+      # bare `oom` matched inside `/rooms/`, so every Matrix room URL became a
+      # critical event (3,518 of them in two hours on one host).
+      if match(.raw, r'(?i)(\bpanic\b|\bfatal\b|\bsegfault\b|\boom\b|\boomkill\b|\bdeadlock\b|core dumped)') {
+        .severity = "critical"
+      } else if .status_code >= 500 {
+        .severity = "error"
+      } else if .status_code >= 400 && .status_code < 500 && .severity == "info" {
+        .severity = "warning"
+      }
+
+  qualified:
+    type: filter
+    inputs:
+      - classify
+    condition: '.severity == "error" || .severity == "critical"'
+
+{% if vector_edge_http_access | bool %}
+
+  # ---- the public edge's looking-glass -------------------------------------
+  # One event per request, but only the ones worth keeping. Everything that
+  # returns below 4xx is aborted here, and so are static assets; what survives
+  # carries the fields an investigation actually uses.
+  http_access:
+    type: remap
+    inputs:
+      - docker_logs_http
+    source: |
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = .container_name
+      .log_stream = .stream
+      .ts = .timestamp
+      .raw = to_string(.message) ?? ""
+
+      .http_status = 0
+      parsed, perr = parse_json(.raw)
+      if perr == null && is_object(parsed) && is_integer(parsed.DownstreamStatus) {
+        .http_status = to_int!(parsed.DownstreamStatus)
+        .http_method = to_string(parsed.RequestMethod) ?? "-"
+        .http_host = to_string(parsed.RequestHost) ?? "-"
+        .http_path = to_string(parsed.RequestPath) ?? "-"
+        .http_router = to_string(parsed.RouterName) ?? "-"
+        .http_service = to_string(parsed.ServiceName) ?? "-"
+        .http_duration_ns = to_int(parsed.Duration) ?? 0
+        # Public client address: on a public edge this is the evidence.
+        .client_addr = to_string(parsed.ClientAddr) ?? "-"
+        .user_agent = to_string(parsed."request_User-Agent") ?? "-"
+      } else {
+        # The proxy's own log line (startup, config, middleware errors). Not an
+        # access event, but still an error worth shipping.
+        .http_status = 0
+        .severity = "error"
+      }
+
+      # ---- what do we already know about this request? ----
+      # Normalisation MUST match scripts/bake_judgements.py::normalise or the
+      # lookup misses and everything reads as unknown.
+      jp = to_string(.http_path) ?? "/"
+      jparts = split(jp, "?")
+      jp = to_string(jparts[0])
+      jp = decode_percent(jp)
+      jp = replace(jp, r'[0-9a-fA-F]{8,}', "{hex}")
+      jp = replace(jp, r'[A-Za-z0-9_\-]{24,}', "{tok}")
+      jp = replace(jp, r'\d+', "{n}")
+      jp = replace(jp, r'/{2,}', "/")
+
+      jrow, jerr = get_enrichment_table_record("judgements", {"template": jp})
+      if jerr == null && jrow != null {
+        .class = to_string(jrow.class) ?? "unknown"
+        .judgement_reason = to_string(jrow.reason) ?? ""
+        .judgement_confidence = to_string(jrow.confidence) ?? ""
+      } else {
+        .class = "unknown"
+      }
+      .danger = .class == "recon" || .class == "injection" || .class == "auth_probe"
+
+      # ---- one vocabulary across lenses ------------------------------------
+      # `class` stays the baked judgement's own word (recon/injection/...).
+      # `lens_class` is the shared fleet-wide vocabulary every lens emits, so a
+      # query written on one host works on all of them: probe, auth, injection,
+      # throttle, client_error, error, noise, unknown. When the table has no
+      # opinion, the HTTP status decides.
+      if .class == "recon" { .lens_class = "probe" }
+      else if .class == "auth_probe" { .lens_class = "auth" }
+      else if .class == "injection" { .lens_class = "injection" }
+      else if .class == "noise" { .lens_class = "noise" }
+      else {
+        stc = .http_status
+        if stc >= 500 { .lens_class = "error" }
+        else if stc == 401 || stc == 403 { .lens_class = "auth" }
+        else if stc == 429 { .lens_class = "throttle" }
+        else if stc >= 400 { .lens_class = "client_error" }
+        else { .lens_class = "unknown" }
+      }
+
+      # Confident "noise" is the only class allowed to silence a line outright:
+      # it is traffic we have judged to be our own automation. The confidence
+      # floor is what makes that safe — a low-confidence noise is shipped and
+      # counted, never quietly dropped.
+      jconf = to_float(.judgement_confidence) ?? 0.0
+      if .class == "noise" && jconf >= 0.8 { abort }
+
+      # ---- prune aggressively, then ship ----
+      if .http_status > 0 {
+        # A request that is dangerous at 200 is the one case the error lane
+        # cannot see. Judgement ships it; everything else keeps the old floor.
+        if .http_status < {{ vector_edge_http_keep_status_below }} && !.danger { abort }
+{% if vector_edge_http_prune_static | bool %}
+        if match(to_string!(.http_path), r'{{ vector_edge_http_static_regex }}') { abort }
+{% endif %}
+        if .http_status >= 500 { .severity = "error" } else { .severity = "warning" }
+        if .danger && .http_status < 400 { .severity = "warning" }
+        m = to_string(.http_method) ?? "-"
+        p = to_string(.http_path) ?? "-"
+        st = to_string(.http_status)
+        h = to_string(.http_host) ?? "-"
+        r = to_string(.http_router) ?? "-"
+        u = to_string(.http_service) ?? "-"
+        .raw = m + " " + p + " -> " + st + " host=" + h + " router=" + r + " upstream=" + u + " class=" + to_string(.class)
+      }
+{% endif %}
+{% if vector_edge_caddy_access | bool %}
+
+  # ---- the Caddy front door ------------------------------------------------
+  # Caddy's JSON access log is the only complete record of a host whose ingress
+  # is Caddy. Synapse sees the API calls; it never sees a probe for /.env, a
+  # request with a forged Host header, or anything Caddy answers itself.
+  #
+  # Same contract as the Traefik lens: one structured event per request that
+  # survived, nothing below 4xx unless the path is one only an attacker wants.
+  caddy_access:
+    type: remap
+    inputs:
+      - docker_logs
+    source: |
+      rec = .message
+      if !is_object(rec) {
+        parsed, perr = parse_json(to_string(rec) ?? "")
+        if perr != null { abort }
+        rec = parsed
+      }
+      if !is_object(rec) { abort }
+
+      # Only access records. Caddy also writes startup and TLS lines, which the
+      # ordinary qualifier still sees and ships when they are errors.
+      logger = to_string(rec.logger) ?? ""
+      if !contains(logger, "http.log.access") { abort }
+
+      req = rec.request
+      if !is_object(req) { abort }
+
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = .container_name
+      # Namespace this lens's verdict. `class` belongs to the baked judgement
+      # table (recon/access/noise…); a live lens verdict is a different
+      # vocabulary and must not be queried as if it were a baked decision.
+      .lens = "caddy"
+      .log_stream = .stream
+      .ts = rec.ts
+      .http_method = to_string(req.method) ?? "-"
+      .http_host = to_string(req.host) ?? "-"
+      .http_status = to_int(rec.status) ?? 0
+
+      uri = to_string(req.uri) ?? "/"
+      parts = split(uri, "?")
+      .http_path = parts[0]
+
+      .client_addr = "-"
+      if req.remote_ip != null { .client_addr = to_string!(req.remote_ip) }
+      if req.client_ip != null { .client_addr = to_string!(req.client_ip) }
+
+      ua = "-"
+      if is_object(req.headers) {
+        header = req.headers."User-Agent"
+        if is_array(header) { ua = join!(header, ", ") }
+        else if header != null { ua = to_string!(header) }
+      }
+      .user_agent = ua
+
+      d = to_float(rec.duration) ?? 0.0
+      .http_duration_ms = to_int!(d * 1000.0)
+      .response_bytes = to_int(rec.size) ?? 0
+
+      # ---- what is this request, and does it deserve to leave the box? ----
+      p = string!(.http_path)
+      sensitive = match(p, r'(?i)^/(\.env|\.git|\.svn|\.hg|\.aws|\.ssh|\.ds_store|wp-|wordpress|wp/|xmlrpc\.php|phpinfo|phpmyadmin|pma/|adminer|_profiler|debug/pprof|actuator|server-status|server-info|vendor/phpunit|config\.(json|php|yml|yaml))')
+      injected = match(p, r'(?i)(\.\./|%2e%2e|%252e|/etc/passwd|union[\s\+]+select|<script|%3cscript|\$\{jndi:)')
+
+      # A 200 on /.env is the case a status filter cannot see. Sensitive paths
+      # ship at any status; everything else keeps the 4xx floor.
+      if .http_status < 400 && !sensitive && !injected { abort }
+{% if vector_edge_http_prune_static | bool %}
+      if !sensitive && match(p, r'{{ vector_edge_http_static_regex }}') { abort }
+{% endif %}
+
+      .lens_class = "client_error"
+      if injected { .lens_class = "injection" }
+      else if sensitive { .lens_class = "probe" }
+      else if .http_status == 401 || .http_status == 403 { .lens_class = "auth" }
+      else if .http_status == 429 { .lens_class = "throttle" }
+      else if .http_status >= 500 { .lens_class = "error" }
+      .danger = .lens_class == "injection" || .lens_class == "probe" || .lens_class == "auth" || .lens_class == "error"
+
+      if .http_status >= 500 || injected || sensitive { .severity = "error" } else { .severity = "warning" }
+
+      .raw = to_string(.http_method) + " " + p + " -> " + to_string(.http_status) + " host=" + to_string(.http_host) + " client=" + to_string(.client_addr) + " lens_class=" + to_string(.lens_class)
+{% endif %}
+{% if vector_edge_synapse_access | bool %}
+
+  # ---- the Synapse application lens ---------------------------------------
+  # One line per request, carrying the authenticated user. Caddy sees the path
+  # and status; only Synapse knows who asked.
+  #
+  # Suppression is the point: /sync, /typing and /versions were 88.8% of all
+  # calls. They are dropped here and counted hourly, never shipped.
+  synapse_access:
+    type: remap
+    inputs:
+      - docker_logs
+    source: |
+      raw = to_string(.message) ?? ""
+      if !contains(raw, "synapse.access.http") || !contains(raw, "Processed request:") { abort }
+
+      parsed, perr = parse_regex(raw, r'^(?P<ts>\d{4}-\d\d-\d\d \d\d:\d\d:\d\d,\d+) - (?P<logger>\S+) - \d+ - (?P<level>\w+) - (?P<req>\S*) - (?P<ip>[0-9a-fA-F:.]+) - (?P<port>\d+) - \{(?P<user>[^}]*)\} Processed request: (?P<dur>[\d.]+)sec/[\d.-]+sec ru=\([^)]*\) db=\([^)]*\) (?P<size>\d+)B (?P<status>\d{3})(?P<alarm>!?) "(?P<method>\S+) (?P<uri>\S+) HTTP/[\d.]+" "(?P<ua>.*)" \[\d+ dbevts\]$')
+      if perr != null { abort }
+
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = .container_name
+      .lens = "synapse"
+      .log_stream = .stream
+      .ts = .timestamp
+      .request_id = to_string!(parsed.req)
+      .client_addr = to_string!(parsed.ip)
+      .http_method = to_string!(parsed.method)
+      .http_status = to_int!(parsed.status)
+      .http_duration_ms = to_int!(to_float!(parsed.dur) * 1000.0)
+      .response_bytes = to_int!(parsed.size)
+      .user_agent = to_string!(parsed.ua)
+
+      uri = to_string!(parsed.uri)
+      parts = split(uri, "?")
+      p = to_string!(parts[0])
+      .http_path = p
+
+      # Synapse logs an appservice's call as "@app|@user". Keeping that as one
+      # opaque string would lose the actor, so split it.
+      ur = to_string!(parsed.user)
+      .user_id = ""
+      .acting_as = ""
+      if ur != "None" && ur != "" {
+        segs = split(ur, "|")
+        .user_id = to_string!(segs[0])
+        if length(segs) > 1 { .acting_as = to_string!(segs[1]) }
+      }
+
+      # One key per call shape. Room/user/event ids are opaque and high
+      # cardinality; masking them is what makes 2,673 paths into 751 templates.
+      t = replace(p, r'%21[^/]+', "{room}")
+      t = replace(t, r'![^/]+', "{room}")
+      t = replace(t, r'%40[^/]+', "{user}")
+      t = replace(t, r'@[^/]+', "{user}")
+      t = replace(t, r'%24[A-Za-z0-9_\-]+', "{event}")
+      t = replace(t, r'\$[A-Za-z0-9_\-]+', "{event}")
+      t = replace(t, r'/[A-Za-z0-9_\-]{20,}', "/{id}")
+      t = replace(t, r'/\d+', "/{n}")
+      .http_template = t
+
+      f = "other"
+      if starts_with(p, "/_matrix/client/v3/sync") || starts_with(p, "/_matrix/client/r0/sync") { f = "sync" }
+      else if starts_with(p, "/_synapse/admin") { f = "admin" }
+      else if starts_with(p, "/_matrix/federation") { f = "federation" }
+      else if starts_with(p, "/_matrix/client/versions") { f = "versions" }
+      else if starts_with(p, "/_matrix/app") { f = "appservice" }
+      else if contains(p, "/account/whoami") { f = "whoami" }
+      else if contains(p, "/login") { f = "login" }
+      else if contains(p, "/typing/") { f = "typing" }
+      else if contains(p, "/receipt/") || contains(p, "read_markers") { f = "receipts" }
+      else if contains(p, "/presence/") { f = "presence" }
+      else if contains(p, "/send/") { f = "send" }
+      else if contains(p, "/state/") { f = "state" }
+      else if contains(p, "/media/") || contains(p, "preview_url") || contains(p, "/thumbnail") { f = "media" }
+      else if contains(p, "/keys/") { f = "keys" }
+      else if contains(p, "/join/") { f = "join" }
+      else if contains(p, "/devices") { f = "devices" }
+      else if contains(p, "/rooms/") { f = "room_other" }
+      .family = f
+
+      # Classify bridge protocol if this request involves an appservice or bridge actor
+      bp = "none"
+      actor = .acting_as
+      if actor == "" { actor = .user_id }
+
+      if contains(actor, "@_ap_") || contains(actor, "@ap_") || contains(.user_id, "activitypub") {
+        bp = "activitypub"
+      } else if contains(actor, "@_discord_") || contains(.user_id, "discord") {
+        bp = "discord"
+      } else if contains(actor, "@_imessage_") || contains(.user_id, "imessage") {
+        bp = "imessage"
+      } else if contains(actor, "@_buzz_") || contains(actor, "@buzz_") || contains(.user_id, "buzz") {
+        bp = "buzz"
+      } else if .acting_as != "" || f == "appservice" {
+        bp = "appservice"
+      }
+      .bridge_protocol = bp
+
+      is_admin_write = f == "admin" && (.http_method == "PUT" || .http_method == "POST" || .http_method == "DELETE")
+
+      # ---- what is suppressed, and why -----------------------------------
+      # Suppression is a decision, so it carries a reason that becomes a count.
+      .suppressed = false
+      .drop_reason = ""
+      if .http_status < 400 && !is_admin_write && f != "login" {
+        .suppressed = true
+        .drop_reason = "routine"
+      }
+      if f == "media" && .http_status == 404 {
+        .suppressed = true
+        .drop_reason = "media_404"
+      }
+      if f == "state" && .http_status == 404 {
+        .suppressed = true
+        .drop_reason = "state_404"
+      }
+      if f == "presence" && .http_status == 429 {
+        .suppressed = true
+        .drop_reason = "presence_429"
+      }
+      # 499 is Synapse's "client closed the request" — the long-poll was aborted
+      # by the client, not failed by the server. It is the normal end of a sync.
+      if .http_status == 499 {
+        .suppressed = true
+        .drop_reason = "client_disconnect"
+      }
+
+      # ---- what it is ------------------------------------------------------
+      .lens_class = "client_error"
+      .danger = false
+      if contains(p, "/keys/upload") && .http_status == 400 {
+        # A rejected E2E key upload is a broken client, not a bad request: it
+        # produces no error line and silently degrades encryption.
+        .lens_class = "keys_upload"
+        .danger = true
+      } else if is_admin_write {
+        .lens_class = "admin_write"
+      } else if f == "admin" || f == "login" {
+        .lens_class = "auth"
+        .danger = .http_status >= 400
+      } else if f == "federation" {
+        .lens_class = "federation_error"
+        .danger = true
+      } else if bp != "none" && .http_status >= 400 {
+        # Bridge failures risk silent loss of cross-network messaging.
+        .lens_class = "bridge_error"
+        .danger = true
+      } else if .http_status == 401 || .http_status == 403 {
+        # An unauthenticated or forbidden call anywhere is an auth event, not a
+        # generic client error: it is the class an investigation searches for.
+        .lens_class = "auth"
+        .danger = true
+      } else if .http_status >= 500 {
+        .lens_class = "error"
+        .danger = true
+      }
+
+      # A stable key for the same failure shape, so repeats can be collapsed at
+      # query time. It is not used to drop events at the edge: an edge that
+      # silently caps evidence cannot be distinguished from a quiet host.
+      if is_admin_write {
+        .dedup_key = "admin|" + to_string!(.request_id)
+      } else if bp != "none" {
+        .dedup_key = bp + "|" + f + "|" + t + "|" + to_string!(.user_id) + "|" + to_string!(.http_status)
+      } else {
+        .dedup_key = f + "|" + t + "|" + to_string!(.user_id) + "|" + to_string!(.http_status)
+      }
+
+      raw_str = to_string!(.http_method) + " " + p + " -> " + to_string!(.http_status) + " user=" + to_string!(.user_id) + " family=" + f + " lens_class=" + to_string!(.lens_class)
+      if bp != "none" {
+        raw_str = raw_str + " bridge=" + bp
+      }
+      .raw = raw_str
+
+  # Ships what survived suppression. No throttle here: Vector 0.58's throttle
+  # honours threshold globally in practice, not per key_field, and was observed
+  # dropping every event after the first for an hour. A silent cap on evidence
+  # is worse than 373 events a day.
+  synapse_ship:
+    type: filter
+    inputs:
+      - synapse_access
+    condition: '.suppressed == false'
+
+  # Everything suppressed becomes a count, not silence. Three counters an hour
+  # answer "how much did we drop, and of what" without shipping the traffic.
+  synapse_drops:
+    type: filter
+    inputs:
+      - synapse_access
+    condition: '.suppressed == true'
+
+  synapse_drop_count:
+    type: remap
+    inputs:
+      - synapse_drops
+    source: |
+      reason = to_string!(.drop_reason)
+      . = {"host": .host, "intranet": .intranet, "host_class": .host_class,
+           "container": .container, "lens": "synapse", "lens_class": "suppressed",
+           "family": .family, "drop_reason": reason, "count": 1,
+           "severity": "info", "ts": now()}
+      .raw = "suppressed " + reason + " x1"
+
+  synapse_drop_rollup:
+    type: reduce
+    inputs:
+      - synapse_drop_count
+    group_by:
+      - host
+      - intranet
+      - family
+      - drop_reason
+    flush_period_ms: 3600000
+    merge_strategies:
+      count: sum
+
+  synapse_drop_finalize:
+    type: remap
+    inputs:
+      - synapse_drop_rollup
+    source: |
+      .raw = "suppressed " + to_string!(.drop_reason) + " x" + to_string!(.count)
+      .severity = "info"
+      .ts = now()
+{% endif %}
+
+  # ---- proof of life, independent of the qualifier -----------------------
+  heartbeat_identity:
+    type: remap
+    inputs:
+      - heartbeat
+    source: |
+      .host = "{{ vector_edge_host_name }}"
+      .intranet = "{{ vector_edge_intranet }}"
+      .host_class = "{{ vector_edge_host_class }}"
+      .container = "vector"
+      .severity = "info"
+      ._heartbeat = true
+      .raw = "collector alive"
+      .ts = now()
+
+  # ---- sanitize before egress; never ship raw secrets ----
+  sanitize:
+    type: remap
+    inputs:
+      - qualified
+      - heartbeat_identity
+{% if vector_edge_http_access | bool %}
+      - http_access
+{% endif %}
+{% if vector_edge_portal_access | bool %}
+      - portal_access
+{% endif %}
+{% if vector_edge_lg_access | bool %}
+      - lg_access
+{% endif %}
+{% if vector_edge_caddy_access | bool %}
+      - caddy_access
+{% endif %}
+{% if vector_edge_synapse_access | bool %}
+      - synapse_ship
+      - synapse_drop_finalize
+{% endif %}
+    source: |
+      raw = to_string(.raw) ?? ""
+      ts = .ts
+      body = replace!(raw, r'(?i)(password|passwd|secret|token|api[_-]?key|authorization)(\s*[:=]\s*)\S+', "[REDACTED]")
+      body = replace!(body, r'(?i)bearer\s+[A-Za-z0-9._\-]+', "bearer [REDACTED]")
+{% if vector_sanitize_private_ipv4_only | bool %}
+      # Public edge: keep client addresses — they are the evidence — and redact
+      # only the RFC1918 space, which is the internal topology.
+      body = replace!(body, r'\b(?:10\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(?:1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})\b', "[internal-ip]")
+{% else %}
+      body = replace!(body, r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', "[internal-ip]")
+{% endif %}
+      body = truncate(body, 8192)
+      # zero-retention: destroy the unsanitized originals. The sanitized body is the
+      # ONLY copy that may leave the node — raw/message/ts must not ride along.
+      ._msg = body
+      ._time = ts
+      .host = .host
+      .container = .container
+      .severity = .severity
+      .status_code = .status_code
+      del(.raw)
+      del(.message)
+      del(.ts)
+
+sinks:
+  victorialogs:
+    type: http
+    inputs:
+      - sanitize
+    # Stream fields: host and intranet. Both are low-cardinality and stable, and
+    # together they answer "everything in this footprint". host_class rides as a
+    # normal field — derivable from Dura, so it does not need to partition streams.
+    uri: "http://{{ victorialogs_addr }}:9428/insert/jsonline?_stream_fields=host,intranet&_time_field=_time&_msg_field=_msg"
+    method: post
+    encoding:
+      codec: json
+    compression: gzip
+    framing:
+      method: newline_delimited
+    request:
+      timeout_secs: 15
+      retry_attempts: 5
+    # zero-retention on the node: memory buffer only, nothing written to disk.
+    # drop_newest so a centre outage can never back-pressure the docker log stream.
+    buffer:
+      type: memory
+      max_size: 16777216
+      when_full: drop_newest
+    healthcheck:
+      enabled: false

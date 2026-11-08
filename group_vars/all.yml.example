@@ -1,0 +1,21 @@
+---
+# Production Group Variables for Observability Triad
+
+observability_domain: "example.corp"
+observability_logs_subdomain: "logs"
+observability_status_subdomain: "status"
+observability_workflow_subdomain: "workflow"
+observability_auth_subdomain: "auth"
+
+# Webhook Endpoint & Token for Windmill
+windmill_webhook_url: "https://workflow.example.corp/api/w/main/jobs/run/p/u/admin/tenant_remediate"
+windmill_webhook_token: "wm_tok_sec_9948293847293847"
+
+# Synapse Matrix Homeserver & Alerts
+synapse_homeserver_url: "https://matrix.example.corp"
+gatus_matrix_token: "syt_YWxlcnRfaW5qZXN0b3I_xxxxxxxxxxxx"
+gatus_alert_room_id: "!sre_alerts:example.corp"
+
+# Infrastructure Targets
+probe_postgres_host: "10.10.2.6"
+probe_postgres_port: 5432

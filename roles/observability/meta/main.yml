@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: SRE & Platform Team
+  description: Ephemeral zero-retention observability triad (Vector, Dozzle, Gatus) with Traefik ingress for Debian 12.
+  company: Internal Platform Engineering
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - "12"
+  galaxy_tags:
+    - observability
+    - vector
+    - dozzle
+    - gatus
+    - docker
+    - traefik
+    - debian
+
+dependencies: []

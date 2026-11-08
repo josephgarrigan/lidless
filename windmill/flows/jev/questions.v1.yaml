@@ -1,0 +1,71 @@
+# ==============================================================================
+# Decision-gate questions, version v1
+# ==============================================================================
+# L-004. Questions live here, not in Python, so wording can change without a code
+# change - and so `questions_version` can be recorded in every audit envelope.
+#
+# Rules enforced by loader.py:
+#   - every question has a non-empty `instructions` (question ids are NOT sent to
+#     the model, so the whole question must live in the instructions text)
+#   - a `choice` question must declare `no_match_option`, and that option must
+#     exist in `criteria`
+#   - a choice may not exceed 255 options (hard API limit)
+#   - no question id may appear inside its own instructions or criteria text
+#
+# Thresholds are NOT here. They are tenant policy (rules/tenants/*.yaml).
+version: "v1"
+model: "jev-1.13.0"
+
+questions:
+  fault_class:
+    type: choice
+    purpose: "Route a log entry into the fault taxonomy, replacing first-match-wins regex"
+    instructions: >
+      What kind of runtime fault does this log entry describe? Judge the underlying
+      cause, not the first keyword you notice: if a panic is caused by memory
+      exhaustion, the fault is the memory exhaustion.
+    criteria:
+      db_connection_exhaustion: "Database or connection-pool failure: exhausted slots, refused or reset connections, deadlock"
+      oom_memory_ceiling: "Memory exhaustion: OOM kill, allocation failure, cgroup memory limit reached"
+      auth_security_rejection: "Expired or invalid token, failed signature, forbidden scope, TLS or certificate rejection"
+      upstream_timeout: "An upstream or gateway did not answer in time: 502/504, deadline or context timeout"
+      runtime_panic: "A fault in application code itself: panic, segmentation fault, unhandled exception, nil dereference"
+      unclassified: "A fault that fits none of the categories above - say so rather than forcing the closest match"
+    no_match_option: unclassified
+
+  severity:
+    type: choice
+    purpose: "Customer-facing severity, used for routing and for the remediation floor"
+    instructions: >
+      How severe is this condition for the tenant's customers? Weigh what the customer
+      experiences, not how alarming the log line looks.
+    criteria:
+      critical: "Customers cannot use the service, or data is at risk"
+      error: "Service is degraded; customers are affected but still being served"
+      warning: "Internal condition only, with no customer-visible impact"
+      not_an_incident: "Routine operation, not a fault at all"
+    no_match_option: not_an_incident
+
+  is_transient:
+    type: noul
+    purpose: "Informational: does this clear on its own? Not a gate on its own"
+    instructions: "Would this condition most likely clear without operator action?"
+    criteria:
+      "true": "The condition is self-correcting: a retry, a reconnect, a queue draining"
+      "false": "The condition persists until something is fixed or restarted"
+
+  restart_would_help:
+    type: noul
+    purpose: "Primary gate: would a fresh process start plausibly resolve this?"
+    instructions: "Would restarting the container plausibly resolve this condition?"
+    criteria:
+      "true": "A process-state problem a fresh start clears: stuck worker, leaked connection pool, wedged loop"
+      "false": "A capacity, dependency, configuration, or code fault that a restart cannot fix"
+
+  restart_discards_state:
+    type: noul
+    purpose: "Primary gate: would restarting throw away work in flight?"
+    instructions: "Does restarting this container risk discarding in-flight or unsaved state?"
+    criteria:
+      "true": "There is in-flight work, queued messages, or unsaved state that a restart would lose"
+      "false": "The container is stateless, or its work is safely persisted elsewhere before acknowledgement"

@@ -1,0 +1,151 @@
+---
+# Defaults for the edge-collector half of the observer (operator's ruling 2026-10-04)
+#
+# Separate from the observability_* defaults above: those belong to the
+# Vector+Dozzle+Gatus triad, which targets end-user container log browsing and
+# is NOT deployed. These govern the deployed observer path — a Vector collector
+# per node that qualifies at the edge and ships to the centre log store.
+
+# Centre log store (VictoriaLogs). Every node's collector points here.
+# Overlay address, not LAN: the centre is office-host at 192.0.2.2 (.80).
+victorialogs_addr: "192.0.2.2"
+
+# Node identity written onto every event as `.host`.
+# `inventory_hostname` MUST equal the Arachnoid record's `name` and the Dura
+# host id's suffix — e.g. `control-plane`, `media-node`, `office-host`.
+# Do NOT use get_hostname(): inside the Vector container it returns the
+# container id, which is how events were attributed to hashes before 2026-10-27.
+vector_edge_host_name: "{{ inventory_hostname }}"
+
+# Dura placement identity, carried on every event.
+# `intranet` is the Dura intranet name (joasis today; a cloud footprint later —
+# gcp, oci, do — once each is recorded as kind: cloud).
+# `host_class` is Dura's closed vocabulary: platform-server, workload-host,
+# workstation, network-appliance, nas, edge.
+vector_edge_intranet: "joasis"
+vector_edge_host_class: "workload-host"
+
+# System logs. Off by default: a container-only host needs no journald access.
+# Turn it on for any box whose interesting events are systemd units — sshd,
+# the ingress proxy, cloud-init, the unit that will not start.
+vector_edge_journald: false
+vector_edge_journald_units: []
+
+# ---- the public edge lens ---------------------------------------------------
+# For any host directly exposed to the internet whose proxy is the real front
+# door. Traefik logs one JSON line per request at INFO; the default qualifier
+# drops all of them. This reads the proxy container at INFO, parses the access
+# record, then prunes hard: only status >= 400 survives, static assets are
+# dropped, and what remains is structured.
+#
+# Volume check (the DMZ, 2026-10-28): ~25 kept events/hour against ~80 requests
+# per hour — under a megabyte a day. The lens costs nothing to run.
+vector_edge_portal_access: false
+vector_edge_lg_access: false
+vector_edge_lg_container: "looking-glass"
+vector_edge_portal_container: "activitypub-portal"
+vector_edge_http_access: false
+vector_edge_http_container: "traefik"
+vector_edge_http_keep_status_below: 400
+vector_edge_http_prune_static: true
+vector_edge_http_static_regex: '(?i)\.(css|js|mjs|map|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|otf|eot)$'
+
+# ---- the Caddy front door ---------------------------------------------------
+# Caddy writes no access log unless the Caddyfile asks for one. When it does,
+# the record is JSON on stdout and is the *only* complete account of the public
+# front door: Synapse sees only requests that reach the application, so a probe
+# for /.env or /.git never appears in its log at all.
+#
+# Turn this on for a host whose public ingress is Caddy AND whose Caddyfile has:
+#
+#   {
+#       log {
+#           output stdout
+#           format json
+#       }
+#   }
+#
+# With no log directive this lens finds nothing and the collector stays silent —
+# the same failure mode as a Traefik host with no access log.
+vector_edge_caddy_access: false
+
+# ---- the Synapse application lens ------------------------------------------
+# Synapse writes a full access log to stdout: one line per request carrying the
+# authenticated user, client address, status, duration and response size. Caddy
+# sees the request but not who made it; this is the identity lens.
+#
+# Volume is dominated by three families — /sync long-polls, typing notifications
+# and version probes — which together were 88.8% of 61,577 calls in 24h on the
+# OCI edge. They are suppressed, not shipped. Suppressed families are rolled up
+# into one hourly count so "nothing happened" is still measurable.
+#
+# A broken E2E client is the case this lens exists for: 46 key-upload failures
+# in 24h produced no error line anywhere, because a 400 is a normal response.
+vector_edge_synapse_access: false
+
+# When true, only RFC1918 literals are redacted and public client addresses
+# survive. Intended for public edges: the client IP is the evidence, and the
+# internal ranges are the part that must never leave.
+vector_sanitize_private_ipv4_only: false
+
+# Image and footprint. The collector is deliberately tiny; it is a filter, not a store.
+# The alpine image has no journalctl and no systemd, so the journald source cannot
+# start in it ("journalctl failed to execute"). When journald is enabled the
+# debian variant is used instead — that is what the .80 collector runs.
+vector_collector_image_default: "timberio/vector:0.58.0-alpine"
+vector_collector_image_journald: "timberio/vector:0.58.0-debian"
+# Explicit override; normally leave empty and let the journald flag choose.
+vector_collector_image: ""
+vector_collector_mem_limit: "256M"
+vector_collector_data_dir: "/tmp/vector"   # tmpfs only — nothing persists on the node
+vector_collector_base_dir: "/opt/vector"   # compose file + rendered config on the node
+
+# Read-only docker socket. The collector may never write to the Docker API.
+vector_docker_socket: "/var/run/docker.sock"
+
+# Retention is enforced by the centre store, not here. Kept as a documented
+# reference for the centre's compose (task 195: -retentionPeriod=30d).
+victorialogs_retention: "30d"
+
+# Qualifier policy.
+# Narrow by design: only ERROR and CRITICAL leave the node. WARNING is classified
+# but deliberately NOT shipped. Coverage grows as gaps are identified and deemed
+# required (task 198 tracks the known stderr-chatter noise floor).
+vector_qualifier_min_severity: "error"
+
+# Zero-retention guards, enforced in VRL before egress:
+#   - passwords / tokens / bearer values / API keys are replaced with [REDACTED]
+#   - IPv4 literals are replaced with [internal-ip]
+#   - body truncated at 8192 bytes
+#   - the unsanitized originals are deleted from the event, not merely shadowed
+#
+# The last guard exists because of a real defect found during task 196 verification:
+# sanitizing into _msg while leaving `raw`/`message` in the event shipped the
+# plaintext alongside the redacted copy. LogSQL does not index those fields, so a
+# secret search returned empty and the leak looked clean.
+vector_sanitize_enabled: true
+
+# Buffer policy: memory-only, drop_newest. A centre outage must never back-pressure
+# the Docker log stream — back-pressure would block container stdout at the node.
+vector_buffer_type: "memory"
+vector_buffer_max_size: 16777216
+vector_buffer_when_full: "drop_newest"
+
+# Emit one known marker line after deploy. The collector is the only thing on the
+# node that can prove its own path: absence of logs is indistinguishable from a
+# quiet host, so every rollout ends with a marker and a query for it.
+vector_edge_self_test: true
+
+# Nodes the collector is deployed to (documentation; the real list is the
+# `edge_collectors` inventory group — see inventory.edge.ini.example).
+vector_collector_nodes:
+  - "192.0.2.8"   # control-plane  (mini / control plane)
+  - "192.0.2.5"   # media-node        (workstation, hand-issued cert)
+  - "192.0.2.3"   # media-node    (media + fediverse)
+  - "192.0.2.2"   # office-host   (GPU / inference; hosts the centre)
+  - "192.0.2.1"   # vm-dmz-proxy (GCP DMZ edge, lighthouse)
+  - "192.0.2.7"   # federation-node    (OCI edge, Matrix federation)
+# Judgement table baked offline (scripts/bake_judgements.py). Empty means the
+# edge gets a header-only table: every lookup misses, class is "unknown", and
+# behaviour is exactly the error lane. Shipping a bake is an explicit act.
+vector_edge_judgement_csv: ""

@@ -1,0 +1,40 @@
+tenant_id: "platform"
+organization: "internal-infrastructure"
+description: "Platform core infrastructure and system daemons"
+tier: "internal"
+silenced: false
+anecdote_verbosity: "technical"
+
+routing:
+  default_sink: "matrix"
+  matrix_room_id: "!sre_platform_alerts:domain.tld"
+  s3_archive_prefix: "s3://observability-archive/platform/"
+
+severity_overrides:
+  critical:
+    - "matrix"
+    - "pagerduty"
+  error:
+    - "matrix"
+
+auto_remediation:
+  enabled: false
+  target_action: "none"
+
+# Decision gate (L-006). OFF. The platform tenant is internal infrastructure, so
+# sanitized_content is acceptable here; it is also the tenant a rehearsal would
+# run against (L-009), which is why it carries a full block rather than a stub.
+decision_gate:
+  enabled: false
+  mode: "shadow"
+  # lidless#8: benign log lines arrive at the router looking exactly like incidents, and this
+  # tenant's rooms were being told about them. The stopgap refuses anything the collector did not
+  # mark as an error, until the gate itself is answering the severity question.
+  is_error_stopgap: true
+  model: "jev-1.13.0"
+  state_mode: "sanitized_content"
+  questions_version: "v1"
+  allowed_severities:
+    - "critical"
+    - "error"
+  on_low_confidence: "escalate"

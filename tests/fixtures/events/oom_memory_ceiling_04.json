@@ -1,0 +1,26 @@
+{
+  "fixture_id": "oom_memory_ceiling_04",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "critical",
+  "is_error": true,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "critical",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "killed process 4181 (orders_api) total-vm:3012345kB",
+    "timestamp": "2026-09-01T23:12:00Z"
+  },
+  "host_meta": {
+    "container": "orders_api",
+    "hostname": "debian-node-01"
+  }
+}

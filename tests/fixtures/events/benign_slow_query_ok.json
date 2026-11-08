@@ -1,0 +1,26 @@
+{
+  "fixture_id": "benign_slow_query_ok",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "info",
+  "is_error": false,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": false,
+    "severity": "info",
+    "status_code": 200,
+    "stream": "stdout",
+    "raw_message": "query completed in 4210ms (no error)",
+    "timestamp": "2026-09-01T23:56:00Z"
+  },
+  "host_meta": {
+    "container": "ledger_worker",
+    "hostname": "debian-node-02"
+  }
+}

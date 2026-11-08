@@ -1,0 +1,1588 @@
+{
+  "fixtures": 58,
+  "rows": [
+    {
+      "fixture": "auth_security_rejection_01",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 1"
+    },
+    {
+      "fixture": "auth_security_rejection_02",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 2"
+    },
+    {
+      "fixture": "auth_security_rejection_03",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 3"
+    },
+    {
+      "fixture": "auth_security_rejection_04",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 4"
+    },
+    {
+      "fixture": "auth_security_rejection_05",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 5"
+    },
+    {
+      "fixture": "auth_security_rejection_06",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 6"
+    },
+    {
+      "fixture": "auth_security_rejection_07",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 7"
+    },
+    {
+      "fixture": "auth_security_rejection_08",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "AUTH_SECURITY_REJECTION",
+      "engine_class": "AUTH_SECURITY_REJECTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern AUTH_SECURITY_REJECTION fixture 8"
+    },
+    {
+      "fixture": "benign_cache_warm",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (cache_warm); must not be routed"
+    },
+    {
+      "fixture": "benign_config_reload",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (config_reload); must not be routed"
+    },
+    {
+      "fixture": "benign_gatus_probe_ok",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (gatus_probe_ok); must not be routed"
+    },
+    {
+      "fixture": "benign_graceful_shutdown",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (graceful_shutdown); must not be routed"
+    },
+    {
+      "fixture": "benign_health_probe",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (health_probe); must not be routed"
+    },
+    {
+      "fixture": "benign_migration_applied",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (migration_applied); must not be routed"
+    },
+    {
+      "fixture": "benign_request_ok",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (request_ok); must not be routed"
+    },
+    {
+      "fixture": "benign_retry_recovered",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (retry_recovered); must not be routed"
+    },
+    {
+      "fixture": "benign_slow_query_ok",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (slow_query_ok); must not be routed"
+    },
+    {
+      "fixture": "benign_startup_banner",
+      "tags": [
+        "benign"
+      ],
+      "label_class": "NONE",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "none",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "info",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "non-error event (startup_banner); must not be routed"
+    },
+    {
+      "fixture": "db_connection_exhaustion_01",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "severity_below_critical_floor",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 1"
+    },
+    {
+      "fixture": "db_connection_exhaustion_02",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 2"
+    },
+    {
+      "fixture": "db_connection_exhaustion_03",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "severity_below_critical_floor",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 3"
+    },
+    {
+      "fixture": "db_connection_exhaustion_04",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 4"
+    },
+    {
+      "fixture": "db_connection_exhaustion_05",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "severity_below_critical_floor",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 5"
+    },
+    {
+      "fixture": "db_connection_exhaustion_06",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 6"
+    },
+    {
+      "fixture": "db_connection_exhaustion_07",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "severity_below_critical_floor",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 7"
+    },
+    {
+      "fixture": "db_connection_exhaustion_08",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "DB_CONNECTION_EXHAUSTION",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern DB_CONNECTION_EXHAUSTION fixture 8"
+    },
+    {
+      "fixture": "multi_pattern_01",
+      "tags": [
+        "multi_pattern",
+        "ambiguous"
+      ],
+      "label_class": "AMBIGUOUS",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": false,
+      "misresolved_by_first_match": true,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_payment_gateway"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "OOM is the cause; the panic is its symptom; the label is a judgement call, so this fixture is excluded from accuracy figures"
+    },
+    {
+      "fixture": "multi_pattern_02",
+      "tags": [
+        "multi_pattern",
+        "ambiguous"
+      ],
+      "label_class": "AMBIGUOUS",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": false,
+      "misresolved_by_first_match": true,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "auth rejection is the user-visible fault; the label is a judgement call, so this fixture is excluded from accuracy figures"
+    },
+    {
+      "fixture": "multi_pattern_03",
+      "tags": [
+        "multi_pattern",
+        "ambiguous"
+      ],
+      "label_class": "AMBIGUOUS",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": false,
+      "misresolved_by_first_match": true,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_auth_edge"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "the timeout is what the customer saw; the label is a judgement call, so this fixture is excluded from accuracy figures"
+    },
+    {
+      "fixture": "multi_pattern_04",
+      "tags": [
+        "multi_pattern",
+        "ambiguous"
+      ],
+      "label_class": "AMBIGUOUS",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": false,
+      "misresolved_by_first_match": true,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "the segfault is the fault; the label is a judgement call, so this fixture is excluded from accuracy figures"
+    },
+    {
+      "fixture": "multi_pattern_05",
+      "tags": [
+        "multi_pattern",
+        "ambiguous"
+      ],
+      "label_class": "AMBIGUOUS",
+      "engine_class": "DB_CONNECTION_EXHAUSTION",
+      "generic_fallback": false,
+      "class_match": false,
+      "misresolved_by_first_match": true,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_search_index"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "pool exhaustion is the cause; the label is a judgement call, so this fixture is excluded from accuracy figures"
+    },
+    {
+      "fixture": "novel_disk_quota_exceeded",
+      "tags": [
+        "novel"
+      ],
+      "label_class": "UNCLASSIFIED",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "storage exhaustion, not covered by any pattern"
+    },
+    {
+      "fixture": "novel_nats_slow_consumer",
+      "tags": [
+        "novel"
+      ],
+      "label_class": "UNCLASSIFIED",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "queue backlog, no matching keyword"
+    },
+    {
+      "fixture": "novel_tls_clock_skew",
+      "tags": [
+        "novel"
+      ],
+      "label_class": "UNCLASSIFIED",
+      "engine_class": "GENERIC_APPLICATION_FAULT",
+      "generic_fallback": true,
+      "class_match": false,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "HIGH",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "clock/cert problem with no matching keyword"
+    },
+    {
+      "fixture": "oom_memory_ceiling_01",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_payment_gateway"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 1"
+    },
+    {
+      "fixture": "oom_memory_ceiling_02",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 2"
+    },
+    {
+      "fixture": "oom_memory_ceiling_03",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_auth_edge"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 3"
+    },
+    {
+      "fixture": "oom_memory_ceiling_04",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 4"
+    },
+    {
+      "fixture": "oom_memory_ceiling_05",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_search_index"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 5"
+    },
+    {
+      "fixture": "oom_memory_ceiling_06",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 6"
+    },
+    {
+      "fixture": "oom_memory_ceiling_07",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_payment_gateway"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": true,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 7"
+    },
+    {
+      "fixture": "oom_memory_ceiling_08",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "OOM_MEMORY_CEILING",
+      "engine_class": "OOM_MEMORY_CEILING",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "CRITICAL",
+      "envelope_severity": "critical",
+      "severity_diverges": false,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": true,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "policy_disabled_for_tenant",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern OOM_MEMORY_CEILING fixture 8"
+    },
+    {
+      "fixture": "runtime_panic_01",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_payment_gateway"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": false,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "fired_on_severity_string_alone",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 1"
+    },
+    {
+      "fixture": "runtime_panic_02",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 2"
+    },
+    {
+      "fixture": "runtime_panic_03",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_auth_edge"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": false,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "fired_on_severity_string_alone",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 3"
+    },
+    {
+      "fixture": "runtime_panic_04",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 4"
+    },
+    {
+      "fixture": "runtime_panic_05",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_search_index"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": false,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "fired_on_severity_string_alone",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 5"
+    },
+    {
+      "fixture": "runtime_panic_06",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 6"
+    },
+    {
+      "fixture": "runtime_panic_07",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent",
+        "triggered_remediation_restart_container_on_payment_gateway"
+      ],
+      "remediation_triggered": true,
+      "remediation_expected": false,
+      "remediation_agrees": false,
+      "remediation_mismatch_cause": "fired_on_severity_string_alone",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 7"
+    },
+    {
+      "fixture": "runtime_panic_08",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "RUNTIME_PANIC",
+      "engine_class": "RUNTIME_PANIC",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "critical",
+      "engine_severity": "HIGH",
+      "envelope_severity": "critical",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent",
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": true,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern RUNTIME_PANIC fixture 8"
+    },
+    {
+      "fixture": "upstream_timeout_01",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 1"
+    },
+    {
+      "fixture": "upstream_timeout_02",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 2"
+    },
+    {
+      "fixture": "upstream_timeout_03",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 3"
+    },
+    {
+      "fixture": "upstream_timeout_04",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 4"
+    },
+    {
+      "fixture": "upstream_timeout_05",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 5"
+    },
+    {
+      "fixture": "upstream_timeout_06",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 6"
+    },
+    {
+      "fixture": "upstream_timeout_07",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "fintech",
+      "remediation_policy_enabled": true,
+      "dispatched_to": [
+        "slack_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 7"
+    },
+    {
+      "fixture": "upstream_timeout_08",
+      "tags": [
+        "single_pattern"
+      ],
+      "label_class": "UPSTREAM_TIMEOUT",
+      "engine_class": "UPSTREAM_TIMEOUT",
+      "generic_fallback": false,
+      "class_match": true,
+      "misresolved_by_first_match": false,
+      "label_severity_band": "error",
+      "engine_severity": "MEDIUM",
+      "envelope_severity": "error",
+      "severity_diverges": true,
+      "tenant": "alpha-corp",
+      "remediation_policy_enabled": false,
+      "dispatched_to": [
+        "matrix_anecdote_sent"
+      ],
+      "remediation_triggered": false,
+      "remediation_expected": false,
+      "remediation_agrees": true,
+      "remediation_mismatch_cause": "agree",
+      "action_required": false,
+      "action_required_used_by_router": false,
+      "rationale": "single-pattern UPSTREAM_TIMEOUT fixture 8"
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TenantAlertingPolicy",
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "organization",
+    "routing"
+  ],
+  "properties": {
+    "tenant_id": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "enterprise",
+        "business",
+        "pro",
+        "internal"
+      ]
+    },
+    "silenced": {
+      "type": "boolean",
+      "default": false
+    },
+    "anecdote_verbosity": {
+      "type": "string",
+      "enum": [
+        "user_friendly",
+        "executive",
+        "technical"
+      ],
+      "default": "user_friendly"
+    },
+    "routing": {
+      "type": "object",
+      "required": [
+        "default_sink"
+      ],
+      "properties": {
+        "default_sink": {
+          "type": "string"
+        },
+        "matrix_room_id": {
+          "type": "string"
+        },
+        "slack_webhook_url": {
+          "type": "string"
+        },
+        "pagerduty_routing_key": {
+          "type": "string"
+        },
+        "s3_archive_prefix": {
+          "type": "string"
+        }
+      }
+    },
+    "severity_overrides": {
+      "type": "object",
+      "properties": {
+        "critical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "error": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warning": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "auto_remediation": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "target_action": {
+          "type": "string",
+          "enum": [
+            "restart_container",
+            "isolate_network",
+            "scale_worker",
+            "none"
+          ]
+        },
+        "max_restarts_per_hour": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "decision_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Typed System One decisions from Jev. Off unless a tenant opts in; thresholds are per action, never one global number.",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "shadow",
+            "enforce"
+          ],
+          "default": "shadow"
+        },
+        "model": {
+          "type": "string",
+          "description": "Must pin a version. An alias invalidates calibrated thresholds.",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$",
+          "not": {
+            "pattern": "-latest$"
+          }
+        },
+        "state_mode": {
+          "type": "string",
+          "enum": [
+            "sanitized_content",
+            "structured_only"
+          ],
+          "description": "ADR-0001: sanitized_content sends structured metadata plus sanitize_message() output; structured_only sends no log text at all."
+        },
+        "questions_version": {
+          "type": "string",
+          "pattern": "^v[0-9]+$"
+        },
+        "allowed_severities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "error",
+              "warning",
+              "not_an_incident"
+            ]
+          }
+        },
+        "on_low_confidence": {
+          "type": "string",
+          "enum": [
+            "escalate",
+            "route_only"
+          ],
+          "default": "escalate"
+        },
+        "shadow": {
+          "type": "boolean",
+          "default": false,
+          "description": "L-007: evaluate and record what the gate WOULD have done, without acting. Independent of `enabled`, which is the authority switch, so shadow can run while the gate remains off."
+        },
+        "is_error_stopgap": {
+          "type": "boolean",
+          "default": false,
+          "description": "lidless#8, option A: refuse to dispatch an event the collector did not mark as an error (`event_meta.is_error`). An interim guard for a tenant that needs quiet before its gate is answering the severity question; the durable answer is the gate's own `not_an_incident` severity (option B), which needs `enabled` with enforce mode."
+        },
+        "thresholds": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "restart_container",
+              "isolate_network",
+              "scale_worker"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "min_severity_confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_restart_would_help": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "max_restart_discards_state": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "min_is_transient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "fixture_id": "db_connection_exhaustion_08",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "remaining connection slots are reserved for superuser connections",
+    "timestamp": "2026-09-01T23:08:00Z"
+  },
+  "host_meta": {
+    "container": "ledger_worker",
+    "hostname": "debian-node-02"
+  }
+}

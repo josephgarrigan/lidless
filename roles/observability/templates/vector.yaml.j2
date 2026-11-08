@@ -1,0 +1,197 @@
+# ==============================================================================
+# Vector Configuration: Multi-Tenant In-Memory Log Processor (< 35 MB RAM)
+# ==============================================================================
+# Architecture:
+# - Headless ingestion from /var/run/docker.sock:ro with ZERO disk retention.
+# - High-performance VRL extracts multi-tenant metadata (tenant_id, org_id, team,
+#   environment) across JSON schemas, URL paths, regex tags, and container labels.
+# - Classifies severity (critical/error/warning) and drops routine noise in-memory.
+# - Emits structured multi-tenant envelopes directly to Windmill routing engine.
+
+data_dir: /tmp/vector
+
+sources:
+  docker_events:
+    type: docker_logs
+    exclude_containers:
+      - vector
+      - dozzle
+      - gatus
+
+transforms:
+  parse_and_extract_tenant:
+    type: remap
+    inputs:
+      - docker_events
+    source: |
+      # ----------------------------------------------------------------------
+      # 1. Initialize Multi-Tenant Envelope & Taxonomy
+      # ----------------------------------------------------------------------
+      .tenant = {}
+      .tenant.id = "global"
+      .tenant.org = "platform"
+      .tenant.team = "core"
+      .tenant.environment = "production"
+
+      .event_meta = {}
+      .event_meta.is_error = false
+      .event_meta.severity = "info"
+
+      # ----------------------------------------------------------------------
+      # 2. Structured JSON Parsing & Deep Metadata Extraction
+      # ----------------------------------------------------------------------
+      parsed, err = parse_json(.message)
+      if err == null && is_object(parsed) {
+        .structured = parsed
+
+        # Tenant Identifier Extraction
+        if is_string(parsed.tenant_id) && parsed.tenant_id != "" {
+          .tenant.id = parsed.tenant_id
+        } else if is_string(parsed.tenant) && parsed.tenant != "" {
+          .tenant.id = parsed.tenant
+        } else if is_string(parsed.organization_id) && parsed.organization_id != "" {
+          .tenant.id = parsed.organization_id
+        } else if is_string(parsed.org_id) && parsed.org_id != "" {
+          .tenant.id = parsed.org_id
+        }
+
+        # Organization Extraction
+        if is_string(parsed.organization) && parsed.organization != "" {
+          .tenant.org = parsed.organization
+        } else if is_string(parsed.org) && parsed.org != "" {
+          .tenant.org = parsed.org
+        } else {
+          .tenant.org = .tenant.id
+        }
+
+        # Team Extraction
+        if is_string(parsed.team_id) && parsed.team_id != "" {
+          .tenant.team = parsed.team_id
+        } else if is_string(parsed.team) && parsed.team != "" {
+          .tenant.team = parsed.team
+        }
+
+        # Environment Extraction
+        if is_string(parsed.environment) && parsed.environment != "" {
+          .tenant.environment = parsed.environment
+        } else if is_string(parsed.env) && parsed.env != "" {
+          .tenant.environment = parsed.env
+        }
+      }
+
+      # ----------------------------------------------------------------------
+      # 3. Fallback Heuristics: URL Paths, Tags, & Docker Container Labels
+      # ----------------------------------------------------------------------
+      if .tenant.id == "global" {
+        # Check URL Path: /api/v[0-9]+/t/([a-zA-Z0-9_-]+)/ or /orgs?/([a-zA-Z0-9_-]+)/
+        path_matches = parse_regex(.message, r'/(api/v[0-9]+/t|orgs?|tenants?)/(?P<tenant>[a-zA-Z0-9_-]+)/') ?? {}
+        if is_string(path_matches.tenant) && path_matches.tenant != "" {
+          .tenant.id = path_matches.tenant
+          .tenant.org = path_matches.tenant
+        } else {
+          # Check Tag Pattern: tenant:([a-zA-Z0-9_-]+) or org:([a-zA-Z0-9_-]+)
+          tag_matches = parse_regex(.message, r'(?i)(tenant|org)[:=](?P<tenant>[a-zA-Z0-9_-]+)') ?? {}
+          if is_string(tag_matches.tenant) && tag_matches.tenant != "" {
+            .tenant.id = tag_matches.tenant
+            .tenant.org = tag_matches.tenant
+          } else if is_string(.container_labels."tenant_id") && .container_labels."tenant_id" != "" {
+            .tenant.id = .container_labels."tenant_id"
+            .tenant.org = .container_labels."tenant_id"
+          } else if is_string(.container_labels."com.docker.compose.project") && .container_labels."com.docker.compose.project" != "" {
+            .tenant.id = .container_labels."com.docker.compose.project"
+            .tenant.org = .container_labels."com.docker.compose.project"
+          }
+        }
+      }
+
+      # Fallback Team check via labels or tag
+      if .tenant.team == "core" {
+        team_matches = parse_regex(.message, r'(?i)team[:=](?P<team>[a-zA-Z0-9_-]+)') ?? {}
+        if is_string(team_matches.team) && team_matches.team != "" {
+          .tenant.team = team_matches.team
+        } else if is_string(.container_labels."team") && .container_labels."team" != "" {
+          .tenant.team = .container_labels."team"
+        }
+      }
+
+      # ----------------------------------------------------------------------
+      # 4. Severity Classification & Error Detection
+      # ----------------------------------------------------------------------
+      # Default status code extraction
+      status_code = 200
+      if is_object(.structured) {
+        if is_integer(.structured.status) {
+          status_code = .structured.status
+        } else if is_integer(.structured.status_code) {
+          status_code = .structured.status_code
+        }
+      }
+
+      # Critical: Stderr + Fatal/Panic/OOM/Segfault
+      if match(.message, r'(?i)(panic|fatal|segfault|oom|deadlock|core dumped)') {
+        .event_meta.is_error = true
+        .event_meta.severity = "critical"
+      } else if .stream == "stderr" || status_code >= 500 {
+        .event_meta.is_error = true
+        .event_meta.severity = "error"
+      } else if match(.message, r'(?i)(exception|denied|unauthorized|connection refused|timeout)') {
+        .event_meta.is_error = true
+        .event_meta.severity = "error"
+      } else if status_code >= 400 && status_code < 500 {
+        .event_meta.is_error = true
+        .event_meta.severity = "warning"
+      }
+
+      # ----------------------------------------------------------------------
+      # 5. Clean Structured Multi-Tenant Output Payload
+      # ----------------------------------------------------------------------
+      .host_meta = {}
+      .host_meta.container = .container_name ?? "unknown"
+      .host_meta.hostname = get_hostname() ?? "debian-host"
+      .event_meta.status_code = status_code
+      .event_meta.stream = .stream
+      .event_meta.raw_message = .message
+      .event_meta.timestamp = .timestamp ?? now()
+
+      # Flatten root keys for high-performance indexing
+      .tenant_id = .tenant.id
+      .org_id = .tenant.org
+      .team_id = .tenant.team
+      .is_error = .event_meta.is_error
+      .severity = .event_meta.severity
+
+  actionable_tenant_events:
+    type: filter
+    inputs:
+      - parse_and_extract_tenant
+    condition: ".is_error == true"
+
+sinks:
+  windmill_tenant_webhook:
+    type: http
+    inputs:
+      - actionable_tenant_events
+    uri: "{{ windmill_webhook_url }}"
+    method: post
+    auth:
+      strategy: bearer
+      token: "${WINDMILL_WEBHOOK_TOKEN}"
+    headers:
+      Content-Type: "application/json"
+      X-Source: "vector-observability"
+      X-Tenant-ID: "{{ '{{' }} tenant_id {{ '}}' }}"
+      X-Org-ID: "{{ '{{' }} org_id {{ '}}' }}"
+      X-Team-ID: "{{ '{{' }} team_id {{ '}}' }}"
+      X-Severity: "{{ '{{' }} severity {{ '}}' }}"
+    encoding:
+      codec: json
+    buffer:
+      type: memory
+      max_events: 500
+      when_full: drop_newest
+    batch:
+      max_events: 10
+      timeout_secs: 1
+    request:
+      timeout_secs: 10
+      retry_attempts: 3

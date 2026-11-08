@@ -1,0 +1,35 @@
+---
+# The edge collector as deployed. Deliberately one container: Vector reads the
+# Docker log stream, qualifies at the edge, and ships survivors to the centre.
+# No Dozzle, no Gatus, no Traefik — those are the triad, not this.
+services:
+  vector:
+    image: {{ vector_collector_image }}
+    container_name: vector
+    restart: unless-stopped
+    command: ["--config", "/etc/vector/vector.yaml"]
+    volumes:
+      - {{ vector_docker_socket }}:/var/run/docker.sock:ro
+      - {{ vector_collector_base_dir }}/config/vector.yaml:/etc/vector/vector.yaml:ro
+      - {{ vector_collector_base_dir }}/config/judgements.csv:/etc/vector/judgements.csv:ro
+{% if vector_edge_journald | bool %}
+      # Read-only journal access. Without both mounts Vector sees no units.
+      - /run/log/journal:/run/log/journal:ro
+      - /var/log/journal:/var/log/journal:ro
+      # journalctl resolves journals under /var/log/journal/<machine-id>. The
+      # container has its own id, so without this it reports "No journal files
+      # were found" while the source looks healthy.
+      - /etc/machine-id:/etc/machine-id:ro
+{% endif %}
+    tmpfs:
+      # Zero-retention: the collector's own scratch space is memory, and it
+      # cannot be executed from. /var/lib/vector is Vector's data_dir and must
+      # exist before start — the journald source refuses to run without it.
+      - /tmp:rw,noexec,nosuid,size=32m
+      - /var/lib/vector:rw,nosuid,nodev,size=32m
+    environment:
+      VECTOR_LOG: warn
+    deploy:
+      resources:
+        limits:
+          memory: {{ vector_collector_mem_limit }}

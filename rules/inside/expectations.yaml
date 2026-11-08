@@ -1,0 +1,56 @@
+# Inside declarations: what a host says it is.
+#
+# This file is the *declared* half of S2 (declared vs actual). The sensor diffs
+# it against what a host's own collector measured.
+#
+# Rules for editing this file:
+#   1. Only declare what was verified on the host. A declaration is an assertion,
+#      and an unverified assertion produces either a false finding or a false
+#      quiet — both cost more than the missing entry.
+#   2. Adding a host is a deliberate act, not a discovery. Discovery belongs to
+#      inventory work; this file is the contract.
+#   3. Removing an entry is a *decision to stop expecting it*. It is not how a
+#      real failure is silenced. The sensor reports removals as drift only when
+#      the expectation file changed (see `--expectations-hash`).
+#
+# `units` are systemd units (Ward profiles are units, per the proposal).
+# `listeners` are TCP listeners: a port is present or the declaration is unmet.
+# `required: false` marks something that may legitimately be absent at rest
+# (e.g. a one-shot or a timer-driven unit).
+version: 1
+declarations:
+  - host: control-plane
+    # 198.51.100.157 / 192.0.2.8 — the control plane.
+    units:
+      - name: mtm-control.service
+        required: true
+      - name: dns-publish.path
+        required: true
+    listeners:
+      - port: 8200
+        process: openbao
+      - port: 3000
+        process: forgejo
+      - port: 3010
+        process: looking-glass
+      - port: 53
+        process: unbound   # UDP+TCP; the collector sees TCP
+
+  - host: media-node
+    # 198.51.100.212 / 192.0.2.3 — media plane during testing.
+    units:
+      - name: jackpottv.service
+        required: true
+      - name: jackpot-ticker.service
+        required: true
+      - name: atrium-cast.service
+        required: true
+      - name: atrium-hls.service
+        required: true
+    listeners:
+      - port: 8020
+        process: uvicorn
+      - port: 8021
+        process: python3
+      - port: 8010
+        process: portal

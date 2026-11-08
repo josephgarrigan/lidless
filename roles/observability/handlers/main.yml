@@ -1,0 +1,26 @@
+---
+# Handlers for role: observability
+
+- name: Restart observability stack
+  ansible.builtin.systemd:
+    name: observability.service
+    state: restarted
+    daemon_reload: true
+  listen: "restart observability"
+
+- name: Restart edge collector
+  ansible.builtin.command:
+    cmd: >-
+      docker compose -f {{ vector_collector_base_dir }}/docker-compose.yaml
+      up -d --force-recreate
+    chdir: "{{ vector_collector_base_dir }}"
+  changed_when: true
+  listen: "restart edge collector"
+
+- name: Reload vector configuration
+  ansible.builtin.command:
+    cmd: docker kill --signal=HUP vector
+  register: vector_reload_res
+  changed_when: vector_reload_res.rc == 0
+  failed_when: false
+  listen: "reload vector"

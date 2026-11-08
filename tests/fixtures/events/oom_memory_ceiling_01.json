@@ -1,0 +1,26 @@
+{
+  "fixture_id": "oom_memory_ceiling_01",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "critical",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "critical",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "fatal error: runtime: out of memory - killed process payment_gateway",
+    "timestamp": "2026-09-01T23:09:00Z"
+  },
+  "host_meta": {
+    "container": "payment_gateway",
+    "hostname": "debian-node-01"
+  }
+}

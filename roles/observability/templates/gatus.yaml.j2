@@ -1,0 +1,111 @@
+# ==============================================================================
+# Gatus Configuration: Active Synthetic Blackbox Prober
+# Target memory budget: < 35 MB RAM
+# ==============================================================================
+# Architecture:
+# - Blackbox monitoring of HTTP, TLS, and TCP endpoints on a 30s cadence.
+# - Dispatches incident & resolution notifications directly to Synapse Matrix room.
+# - Embeds direct Dozzle drill-down deep links inside Matrix alert descriptions.
+
+storage:
+  type: sqlite
+  path: /data/data.db
+
+alerting:
+  matrix:
+    server-url: "${SYNAPSE_HOMESERVER_URL}"
+    access-token: "${GATUS_MATRIX_TOKEN}"
+    internal-room-id: "${GATUS_ALERT_ROOM_ID}"
+    default-alert:
+      failure-threshold: 2
+      success-threshold: 1
+      send-on-resolved: true
+
+endpoints:
+  - name: windmill-api
+    group: core-services
+    url: "https://{{ observability_workflow_subdomain }}.{{ observability_domain }}/api/version"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "Windmill API endpoint is failing health checks. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/windmill_server"
+        send-on-resolved: true
+
+  - name: keycloak-oidc
+    group: authentication
+    url: "https://{{ observability_auth_subdomain }}.{{ observability_domain }}/realms/master/.well-known/openid-configuration"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "Keycloak OIDC discovery endpoint is unhealthy. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/keycloak"
+        send-on-resolved: true
+
+  - name: postgres-tcp
+    group: databases
+    url: "tcp://{{ probe_postgres_host }}:{{ probe_postgres_port }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: matrix
+        description: "PostgreSQL TCP connection failed on port {{ probe_postgres_port }}. Inspect database logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/postgres"
+        send-on-resolved: true
+
+  - name: synapse-client-api
+    group: matrix
+    url: "{{ synapse_client_api_url }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "📢 **[CRITICAL] Synapse Client API versions endpoint is unhealthy**. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/synapse"
+        send-on-resolved: true
+
+  - name: bridge-activitypub
+    group: bridges
+    url: "{{ bridge_activitypub_url }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "📢 **[CRITICAL] ActivityPub Application Service Bridge failure**. Bridge Protocol: `activitypub`. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/matrix-appservice-activitypub"
+        send-on-resolved: true
+
+  - name: bridge-discord
+    group: bridges
+    url: "{{ bridge_discord_url }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "📢 **[CRITICAL] Discord Application Service Bridge failure**. Bridge Protocol: `discord`. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/matrix-appservice-discord"
+        send-on-resolved: true
+
+  - name: bridge-imessage
+    group: bridges
+    url: "{{ bridge_imessage_url }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "📢 **[CRITICAL] iMessage Application Service Bridge failure**. Bridge Protocol: `imessage`. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/matrix-appservice-imessage"
+        send-on-resolved: true
+
+  - name: buzz-agent-trace
+    group: bridges
+    url: "{{ buzz_agent_trace_url }}"
+    interval: {{ probe_cadence }}
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        description: "📢 **[CRITICAL] Buzz Multi-Agent Trace endpoint failure**. Bridge Protocol: `buzz`. Inspect container logs: https://{{ observability_logs_subdomain }}.{{ observability_domain }}/container/buzz_agent"
+        send-on-resolved: true

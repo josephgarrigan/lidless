@@ -1,0 +1,63 @@
+---
+# Defaults for role: observability (Vector + Dozzle + Gatus)
+
+# Base filesystem paths & permissions
+observability_base_dir: "/opt/observability"
+observability_user: "root"
+observability_group: "root"
+observability_dir_mode: "0750"
+observability_file_mode: "0640"
+observability_secret_file_mode: "0600"
+
+# Docker Networking
+observability_docker_network: "control_network"
+
+# Domain Configuration
+observability_domain: "domain.tld"
+observability_logs_subdomain: "logs"
+observability_status_subdomain: "status"
+observability_workflow_subdomain: "workflow"
+observability_auth_subdomain: "auth"
+
+# Container Images
+vector_image: "timberio/vector:0.40.0-alpine"
+dozzle_image: "amir20/dozzle:latest"
+gatus_image: "twinproduction/gatus:latest"
+
+# Service Resource Limits (Target: < 100 MB total RAM)
+vector_mem_limit: "35M"
+vector_mem_reservation: "15M"
+dozzle_mem_limit: "25M"
+dozzle_mem_reservation: "10M"
+gatus_mem_limit: "35M"
+gatus_mem_reservation: "15M"
+
+# Internal Ports
+dozzle_port: 8888
+gatus_port: 8080
+
+# Traefik Ingress Configuration
+traefik_certresolver: "letsencrypt"
+traefik_entrypoint: "websecure"
+traefik_forward_auth_middleware: "keycloak-auth@docker"
+traefik_dynamic_config_dir: "/etc/traefik/dynamic"
+traefik_enable_file_provider: true
+
+# Webhook & Alerting Secrets (Override with Ansible Vault)
+windmill_webhook_url: "https://{{ observability_workflow_subdomain }}.{{ observability_domain }}/api/w/main/jobs/run/p/u/admin/tenant_remediate"
+windmill_webhook_token: "CHANGE_ME_WINDMILL_TOKEN"
+synapse_homeserver_url: "https://matrix.{{ observability_domain }}"
+gatus_matrix_token: "CHANGE_ME_MATRIX_ACCESS_TOKEN"
+gatus_alert_room_id: "!observability_alerts:{{ observability_domain }}"
+
+# Gatus Probe Targets
+probe_postgres_host: "10.10.2.6"
+probe_postgres_port: 5432
+probe_cadence: "30s"
+
+# Matrix & Sovereign Bridge Probers
+synapse_client_api_url: "https://matrix.{{ observability_domain }}/_matrix/client/versions"
+bridge_activitypub_url: "http://192.0.2.7:8090/health"
+bridge_discord_url: "http://192.0.2.7:9885/health"
+bridge_imessage_url: "http://192.0.2.7:29314/health"
+buzz_agent_trace_url: "http://192.0.2.7:9099/health"

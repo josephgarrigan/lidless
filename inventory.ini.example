@@ -1,0 +1,5 @@
+[observability_hosts]
+debian-node-01 ansible_host=10.10.2.10 ansible_user=admin
+
+[observability_hosts:vars]
+ansible_python_interpreter=/usr/bin/python3

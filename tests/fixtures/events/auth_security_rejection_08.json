@@ -1,0 +1,26 @@
+{
+  "fixture_id": "auth_security_rejection_08",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 401,
+    "stream": "stderr",
+    "raw_message": "unauthorized: token audience mismatch (expected api://ledger)",
+    "timestamp": "2026-09-01T23:24:00Z"
+  },
+  "host_meta": {
+    "container": "ledger_worker",
+    "hostname": "debian-node-02"
+  }
+}

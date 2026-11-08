@@ -1,0 +1,43 @@
+# Validated by .github/workflows/reconcile-rules.yml on every rules/** change.
+tenant_id: "alpha-corp"
+organization: "alpha-enterprises"
+description: "Dedicated isolated tenant cluster for Alpha Enterprises"
+tier: "enterprise"
+silenced: false
+anecdote_verbosity: "executive"
+
+routing:
+  default_sink: "matrix"
+  matrix_room_id: "!alpha_dedicated_secops:domain.tld"
+  slack_webhook_url: "https://hooks.slack.com/services/T00/B00/alpha-secops"
+  s3_archive_prefix: "s3://alpha-compliance-logs/2026/"
+
+severity_overrides:
+  critical:
+    - "matrix"
+    - "slack"
+  error:
+    - "matrix"
+
+auto_remediation:
+  enabled: false
+  target_action: "none"
+
+# Decision gate (L-006). OFF, and this tenant is set to the strictest egress mode:
+# an external enterprise tenant whose contract we do not control should not have
+# redacted log text leave the fleet for a US inference vendor. Cost of the choice
+# is fault-class granularity only; severity and transience judgments still work.
+decision_gate:
+  enabled: false
+  mode: "shadow"
+  # lidless#8: benign log lines arrive at the router looking exactly like incidents, and this
+  # tenant's rooms were being told about them. The stopgap refuses anything the collector did not
+  # mark as an error, until the gate itself is answering the severity question.
+  is_error_stopgap: true
+  model: "jev-1.13.0"
+  state_mode: "structured_only"
+  questions_version: "v1"
+  allowed_severities:
+    - "critical"
+    - "error"
+  on_low_confidence: "escalate"

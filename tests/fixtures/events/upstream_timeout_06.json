@@ -1,0 +1,26 @@
+{
+  "fixture_id": "upstream_timeout_06",
+  "tenant_id": "alpha-corp",
+  "org_id": "alpha-enterprises",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "alpha-corp",
+    "org": "alpha-enterprises",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "deadline exceeded: put object to s3 archive bucket",
+    "timestamp": "2026-09-01T23:30:00Z"
+  },
+  "host_meta": {
+    "container": "batch_exporter",
+    "hostname": "debian-node-03"
+  }
+}

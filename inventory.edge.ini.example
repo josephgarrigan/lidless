@@ -1,0 +1,18 @@
+# Edge collectors. Hostnames MUST be the canonical names from the Dura/Arachnoid
+# records: they become the `.host` field and a stream label on every shipped event.
+# `control-plane` / `media-node` are NOT canonical — `control-plane` and
+# `media-node` are.
+#
+# Addresses are overlay (Nebula), not LAN. The collectors and the centre are
+# overlay-only; there is no LAN listener to fall back to.
+#
+# Copy to inventory.edge.ini and set the real SSH user/key for your fleet.
+
+[edge_collectors]
+control-plane  ansible_host=192.0.2.8   ansible_user=operator
+media-node         ansible_host=192.0.2.5   ansible_user=operator
+media-node    ansible_host=192.0.2.3   ansible_user=operator
+office-host    ansible_host=192.0.2.2   ansible_user=operator
+
+[edge_collectors:vars]
+ansible_python_interpreter=/usr/bin/python3

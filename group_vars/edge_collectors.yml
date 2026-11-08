@@ -1,0 +1,27 @@
+---
+# Group variables for the edge collector (edge.yml).
+#
+# Ansible loads this automatically: the play targets the `edge_collectors`
+# group, and the file is named after that group. No `-e` flag needed.
+
+# The centre. Overlay address: office-host at 192.0.2.2. Never the LAN IP —
+# the collectors reach the centre over Nebula, and the LAN bind does not exist.
+victorialogs_addr: "192.0.2.2"
+
+# Node identity on every event. inventory_hostname must be the node's real name
+# (control-plane, media-node, media-node, office-host).
+vector_edge_host_name: "{{ inventory_hostname }}"
+
+# Dura placement, carried on every event. A cloud footprint gets its own
+# intranet record first (kind: cloud); until then everything is joasis.
+vector_edge_intranet: "joasis"
+# Dura class: platform-server | workload-host | workstation | network-appliance | nas | edge
+vector_edge_host_class: "workload-host"
+
+# System logs off by default. Turn on per host in host_vars:
+#   vector_edge_journald: true
+#   vector_edge_journald_units: ["sshd.service", "caddy.service"]
+vector_edge_journald: false
+
+# Qualifier policy: only ERROR and CRITICAL leave the node.
+vector_qualifier_min_severity: "error"

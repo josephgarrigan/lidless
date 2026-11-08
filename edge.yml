@@ -1,0 +1,35 @@
+---
+# Deploy the lidless edge collector to the fleet.
+#
+#   ansible-playbook -i inventory.edge.ini edge.yml
+#
+# This is the playbook described in roles/observability/EDGE.md and the one the
+# four live collectors were built from. site.yml remains the triad, which is
+# not deployed.
+#
+# `edge_collectors` must be reachable over the Nebula overlay: the centre and
+# the collectors are overlay-only by design.
+- name: Deploy the lidless edge collector
+  hosts: edge_collectors
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Require a Linux host with a running Docker daemon
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['os_family'] == "Debian"
+        fail_msg: "The edge collector targets Debian-family hosts (Debian/Ubuntu)."
+        success_msg: >-
+          Host is {{ ansible_facts['distribution'] }}
+          {{ ansible_facts['distribution_version'] }}.
+
+  tasks:
+    # import_role, not `roles:` with tasks_from — the role-entry form was not
+    # honoured and fell through to the triad's tasks/main.yml, which tried to
+    # install docker-compose-v2 over an existing docker-compose-plugin and
+    # failed dpkg on a live host. This form is explicit about which file runs.
+    - name: Deploy the edge collector
+      ansible.builtin.import_role:
+        name: observability
+        tasks_from: edge.yml

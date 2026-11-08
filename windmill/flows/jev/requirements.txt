@@ -1,0 +1,6 @@
+# Runtime dependencies for the decision gate (L-004 onwards).
+#
+# In Windmill these belong in the workspace's dependency set for the script;
+# keep them pinned to the versions exercised by tests/jev_accuracy.py.
+typesafe-sdk>=0.6.0
+PyYAML>=6.0

@@ -1,0 +1,26 @@
+{
+  "fixture_id": "runtime_panic_01",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "critical",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "critical",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "panic: runtime error: index out of range [7] with length 5",
+    "timestamp": "2026-09-01T23:33:00Z"
+  },
+  "host_meta": {
+    "container": "payment_gateway",
+    "hostname": "debian-node-01"
+  }
+}

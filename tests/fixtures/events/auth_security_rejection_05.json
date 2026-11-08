@@ -1,0 +1,26 @@
+{
+  "fixture_id": "auth_security_rejection_05",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "error",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "error",
+    "status_code": 401,
+    "stream": "stderr",
+    "raw_message": "403 forbidden: scope repo.code required",
+    "timestamp": "2026-09-01T23:21:00Z"
+  },
+  "host_meta": {
+    "container": "search_index",
+    "hostname": "debian-node-02"
+  }
+}

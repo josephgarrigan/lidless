@@ -1,0 +1,26 @@
+{
+  "fixture_id": "multi_pattern_05",
+  "tenant_id": "fintech",
+  "org_id": "acme-payments",
+  "team_id": "payments",
+  "severity": "critical",
+  "is_error": true,
+  "tenant": {
+    "id": "fintech",
+    "org": "acme-payments",
+    "team": "payments",
+    "environment": "production"
+  },
+  "event_meta": {
+    "is_error": true,
+    "severity": "critical",
+    "status_code": 500,
+    "stream": "stderr",
+    "raw_message": "too many connections followed by panic: pool monitor crashed",
+    "timestamp": "2026-09-01T23:45:00Z"
+  },
+  "host_meta": {
+    "container": "search_index",
+    "hostname": "debian-node-02"
+  }
+}

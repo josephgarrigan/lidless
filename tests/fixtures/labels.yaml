@@ -1,0 +1,359 @@
+# L-001 fixture labels. Human-assigned; the ground truth for accuracy comparisons.
+# fault_class: one of the five ERROR_PATTERNS ids, or UNCLASSIFIED / NONE.
+# severity_band: critical | error | warning | none (human judgement, not the regex's).
+# remediation_expected: human judgement on whether a container restart is appropriate.
+# fixtures: 58 (ambiguous=5, benign=10, multi_pattern=5, novel=3, single_pattern=40)
+labels:
+  - fixture: db_connection_exhaustion_01
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 1"
+  - fixture: db_connection_exhaustion_02
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 2"
+  - fixture: db_connection_exhaustion_03
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 3"
+  - fixture: db_connection_exhaustion_04
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 4"
+  - fixture: db_connection_exhaustion_05
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 5"
+  - fixture: db_connection_exhaustion_06
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 6"
+  - fixture: db_connection_exhaustion_07
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 7"
+  - fixture: db_connection_exhaustion_08
+    fault_class: DB_CONNECTION_EXHAUSTION
+    severity_band: error
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern DB_CONNECTION_EXHAUSTION fixture 8"
+  - fixture: oom_memory_ceiling_01
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 1"
+  - fixture: oom_memory_ceiling_02
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 2"
+  - fixture: oom_memory_ceiling_03
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 3"
+  - fixture: oom_memory_ceiling_04
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 4"
+  - fixture: oom_memory_ceiling_05
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 5"
+  - fixture: oom_memory_ceiling_06
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 6"
+  - fixture: oom_memory_ceiling_07
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 7"
+  - fixture: oom_memory_ceiling_08
+    fault_class: OOM_MEMORY_CEILING
+    severity_band: critical
+    remediation_expected: true
+    tags: [single_pattern]
+    rationale: "single-pattern OOM_MEMORY_CEILING fixture 8"
+  - fixture: auth_security_rejection_01
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 1"
+  - fixture: auth_security_rejection_02
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 2"
+  - fixture: auth_security_rejection_03
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 3"
+  - fixture: auth_security_rejection_04
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 4"
+  - fixture: auth_security_rejection_05
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 5"
+  - fixture: auth_security_rejection_06
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 6"
+  - fixture: auth_security_rejection_07
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 7"
+  - fixture: auth_security_rejection_08
+    fault_class: AUTH_SECURITY_REJECTION
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern AUTH_SECURITY_REJECTION fixture 8"
+  - fixture: upstream_timeout_01
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 1"
+  - fixture: upstream_timeout_02
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 2"
+  - fixture: upstream_timeout_03
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 3"
+  - fixture: upstream_timeout_04
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 4"
+  - fixture: upstream_timeout_05
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 5"
+  - fixture: upstream_timeout_06
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 6"
+  - fixture: upstream_timeout_07
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 7"
+  - fixture: upstream_timeout_08
+    fault_class: UPSTREAM_TIMEOUT
+    severity_band: error
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern UPSTREAM_TIMEOUT fixture 8"
+  - fixture: runtime_panic_01
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 1"
+  - fixture: runtime_panic_02
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 2"
+  - fixture: runtime_panic_03
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 3"
+  - fixture: runtime_panic_04
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 4"
+  - fixture: runtime_panic_05
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 5"
+  - fixture: runtime_panic_06
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 6"
+  - fixture: runtime_panic_07
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 7"
+  - fixture: runtime_panic_08
+    fault_class: RUNTIME_PANIC
+    severity_band: critical
+    remediation_expected: false
+    tags: [single_pattern]
+    rationale: "single-pattern RUNTIME_PANIC fixture 8"
+  - fixture: multi_pattern_01
+    fault_class: AMBIGUOUS
+    severity_band: critical
+    remediation_expected: true
+    tags: [multi_pattern, ambiguous]
+    intended_class: OOM_MEMORY_CEILING
+    rationale: "OOM is the cause; the panic is its symptom; the label is a judgement call, so this fixture is excluded from accuracy figures"
+  - fixture: multi_pattern_02
+    fault_class: AMBIGUOUS
+    severity_band: critical
+    remediation_expected: true
+    tags: [multi_pattern, ambiguous]
+    intended_class: AUTH_SECURITY_REJECTION
+    rationale: "auth rejection is the user-visible fault; the label is a judgement call, so this fixture is excluded from accuracy figures"
+  - fixture: multi_pattern_03
+    fault_class: AMBIGUOUS
+    severity_band: critical
+    remediation_expected: true
+    tags: [multi_pattern, ambiguous]
+    intended_class: UPSTREAM_TIMEOUT
+    rationale: "the timeout is what the customer saw; the label is a judgement call, so this fixture is excluded from accuracy figures"
+  - fixture: multi_pattern_04
+    fault_class: AMBIGUOUS
+    severity_band: critical
+    remediation_expected: true
+    tags: [multi_pattern, ambiguous]
+    intended_class: RUNTIME_PANIC
+    rationale: "the segfault is the fault; the label is a judgement call, so this fixture is excluded from accuracy figures"
+  - fixture: multi_pattern_05
+    fault_class: AMBIGUOUS
+    severity_band: critical
+    remediation_expected: true
+    tags: [multi_pattern, ambiguous]
+    intended_class: DB_CONNECTION_EXHAUSTION
+    rationale: "pool exhaustion is the cause; the label is a judgement call, so this fixture is excluded from accuracy figures"
+  - fixture: novel_disk_quota_exceeded
+    fault_class: UNCLASSIFIED
+    severity_band: critical
+    remediation_expected: false
+    tags: [novel]
+    rationale: "storage exhaustion, not covered by any pattern"
+  - fixture: novel_tls_clock_skew
+    fault_class: UNCLASSIFIED
+    severity_band: error
+    remediation_expected: false
+    tags: [novel]
+    rationale: "clock/cert problem with no matching keyword"
+  - fixture: novel_nats_slow_consumer
+    fault_class: UNCLASSIFIED
+    severity_band: error
+    remediation_expected: false
+    tags: [novel]
+    rationale: "queue backlog, no matching keyword"
+  - fixture: benign_startup_banner
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (startup_banner); must not be routed"
+  - fixture: benign_health_probe
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (health_probe); must not be routed"
+  - fixture: benign_gatus_probe_ok
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (gatus_probe_ok); must not be routed"
+  - fixture: benign_migration_applied
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (migration_applied); must not be routed"
+  - fixture: benign_request_ok
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (request_ok); must not be routed"
+  - fixture: benign_cache_warm
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (cache_warm); must not be routed"
+  - fixture: benign_graceful_shutdown
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (graceful_shutdown); must not be routed"
+  - fixture: benign_slow_query_ok
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (slow_query_ok); must not be routed"
+  - fixture: benign_retry_recovered
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (retry_recovered); must not be routed"
+  - fixture: benign_config_reload
+    fault_class: NONE
+    severity_band: none
+    remediation_expected: false
+    tags: [benign]
+    rationale: "non-error event (config_reload); must not be routed"
